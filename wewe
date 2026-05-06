@@ -1,0 +1,239 @@
+-- [[ CONFIGURATION ]] --
+local CorrectKey = "YUTABANKAI_2"
+local KeyURL = "https://discord.gg/JQ7dZAVTDW" -- GANTI PAKE LINK DISCORD/LINKVERTISI LU
+local FileName = "YutaHub_KeySafe.txt"
+
+-- [[ KEY SYSTEM UI ]] --
+local CoreGui = game:GetService("CoreGui")
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "YutaKeySystem"
+ScreenGui.Enabled = false -- Sembunyi dulu buat pengecekan
+
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 350, 0, 200)
+Main.Position = UDim2.new(0.5, -175, 0.5, -100)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+local Stroke = Instance.new("UIStroke", Main)
+Stroke.Color = Color3.fromRGB(180, 0, 0)
+Stroke.Thickness = 2
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.Text = "YUTA HUB | KEY SYSTEM"
+Title.TextColor3 = Color3.new(1,1,1)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 20
+Title.BackgroundTransparency = 1
+
+local Box = Instance.new("TextBox", Main)
+Box.Size = UDim2.new(0, 280, 0, 40)
+Box.Position = UDim2.new(0.5, -140, 0.35, 0)
+Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Box.PlaceholderText = "Enter Key..."
+Box.Text = ""
+Box.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", Box)
+
+local CheckBtn = Instance.new("TextButton", Main)
+CheckBtn.Size = UDim2.new(0, 135, 0, 40)
+CheckBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
+CheckBtn.Text = "CHECK KEY"
+CheckBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+CheckBtn.TextColor3 = Color3.new(1,1,1)
+CheckBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", CheckBtn)
+
+local GetBtn = Instance.new("TextButton", Main)
+GetBtn.Size = UDim2.new(0, 135, 0, 40)
+GetBtn.Position = UDim2.new(0.55, 0, 0.65, 0)
+GetBtn.Text = "GET KEY"
+GetBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+GetBtn.TextColor3 = Color3.new(1,1,1)
+GetBtn.Font = Enum.Font.SourceSansBold
+Instance.new("UICorner", GetBtn)
+
+-- [[ LOGIKA UTAMA ]] --
+
+local function Start_YutaHub()
+    print("Key Correct! Starting Yuta Hub...")
+    -- [[ TEMPEL SEMUA KODE UTAMA LU DI BAWAH INI ]] --
+
+-- [[ 8. RAKIT MENU ]] --
+local FarmMenu = CreateCategory("AUTO FARM")
+
+
+-- [[ 4. SETUP UI BANKAI (FIXED ORDER) ]] --
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+if PlayerGui:FindFirstChild("YutaHub_Bankai") then PlayerGui.YutaHub_Bankai:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui", PlayerGui); ScreenGui.Name = "YutaHub_Bankai"; ScreenGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 50, 0, 50); MainFrame.Position = UDim2.new(0.5, -25, 0.1, 0)
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15); MainFrame.BorderSizePixel = 0; MainFrame.Active = true; MainFrame.ClipsDescendants = true
+local Corner = Instance.new("UICorner", MainFrame); Corner.CornerRadius = UDim.new(1, 0)
+local Stroke = Instance.new("UIStroke", MainFrame); Stroke.Color = Color3.fromRGB(180, 0, 0); Stroke.Thickness = 2
+
+local ClickButton = Instance.new("TextButton", MainFrame)
+ClickButton.Size = UDim2.new(0, 50, 0, 50); ClickButton.BackgroundTransparency = 1; ClickButton.Text = "B"; ClickButton.TextColor3 = Color3.new(1,1,1); ClickButton.Font = Enum.Font.SourceSansBold; ClickButton.TextSize = 25
+
+local ContentFrame = Instance.new("ScrollingFrame", MainFrame)
+ContentFrame.Size = UDim2.new(1, -20, 1, -70); ContentFrame.Position = UDim2.new(0, 10, 0, 60); ContentFrame.BackgroundTransparency = 1; ContentFrame.Visible = false; ContentFrame.ScrollBarThickness = 0
+
+-- FIX: Tambahin SortOrder agar nurut sama nomor urut (LayoutOrder)
+local List = Instance.new("UIListLayout", ContentFrame)
+List.Padding = UDim.new(0, 8)
+List.HorizontalAlignment = Enum.HorizontalAlignment.Center
+List.SortOrder = Enum.SortOrder.LayoutOrder 
+
+
+-- [[ 5. FUNGSI KATEGORI DENGAN NOMOR URUT ]] --
+local function CreateCategory(name, order)
+    local CatBtn = Instance.new("TextButton", ContentFrame)
+    CatBtn.Size = UDim2.new(0.95, 0, 0, 35)
+    CatBtn.LayoutOrder = order -- Biar gak nyalip ke atas
+    CatBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    CatBtn.Text = "▼ " .. name
+    CatBtn.TextColor3 = Color3.new(1,1,1)
+    CatBtn.Font = Enum.Font.SourceSansBold
+    CatBtn.TextSize = 14
+    Instance.new("UICorner", CatBtn).CornerRadius = UDim.new(0, 6)
+
+    local SubFrame = Instance.new("Frame", ContentFrame)
+    SubFrame.Size = UDim2.new(0.95, 0, 0, 0)
+    SubFrame.BackgroundTransparency = 1
+    SubFrame.ClipsDescendants = true
+    SubFrame.Visible = false
+    SubFrame.LayoutOrder = order + 1 -- Sub-menu selalu di bawah tombol kategorinya
+    local SL = Instance.new("UIListLayout", SubFrame)
+    SL.Padding = UDim.new(0, 5)
+    SL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    local open = false
+    CatBtn.MouseButton1Click:Connect(function()
+        open = not open
+        SubFrame.Visible = open
+        CatBtn.Text = (open and "▲ " or "▼ ") .. name
+        TweenService:Create(SubFrame, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, SL.AbsoluteContentSize.Y + 5) or UDim2.new(0.95, 0, 0, 0)}):Play()
+    end)
+    return SubFrame
+end
+
+-- [[ 5. SISTEM DRAG & ANIMASI (ANTI-STUCK FIXED) ]] --
+local dragging, dragStart, startPos; local isMenuOpen = false
+
+-- 1. FUNGSI MULAI DRAG
+local function StartDrag(input)
+    dragging = true
+    dragStart = input.Position
+    startPos = MainFrame.Position
+end
+
+-- 2. DETEKSI CLICK (MainFrame & Button)
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        StartDrag(input)
+    end
+end)
+
+ClickButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        StartDrag(input)
+    end
+end)
+
+-- 3. GLOBAL STOPPER (Biar gak nempel/ngikut terus)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = false -- PAKSA MATI DI MANA PUN MOUSE DILEPAS
+    end
+end)
+
+-- 4. UPDATE POSISI
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- 5. LOGIKA BUKA TUTUP (Hanya Trigger jika Klik Cepat)
+ClickButton.MouseButton1Click:Connect(function()
+    -- Cek jika tidak sedang dalam mode drag panjang
+    isMenuOpen = not isMenuOpen
+    if isMenuOpen then
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 420, 0, 280)}):Play()
+        TweenService:Create(Corner, TweenInfo.new(0.3), {CornerRadius = UDim.new(0, 12)}):Play()
+        ContentFrame.Visible = true; ClickButton.TextSize = 14; ClickButton.Text = "CLOSE"
+        ClickButton.Size = UDim2.new(0, 80, 0, 35); ClickButton.Position = UDim2.new(1, -90, 0, 5)
+    else
+        ContentFrame.Visible = false; ClickButton.Text = "B"; ClickButton.TextSize = 25
+        ClickButton.Size = UDim2.new(1, 0, 1, 0); ClickButton.Position = UDim2.new(0, 0, 0, 0)
+        TweenService:Create(Corner, TweenInfo.new(0.3), {CornerRadius = UDim.new(1, 0)}):Play()
+        TweenService:Create(MainFrame, TweenInfo.new(0.3), {Size = UDim2.new(0, 50, 0, 50)}):Play()
+    end
+end)
+
+
+-- [[ 6. BUILDER FUNGSI ]] --
+local function CreateCategory(name)
+    local CatBtn = Instance.new("TextButton", ContentFrame)
+    CatBtn.Size = UDim2.new(0.95, 0, 0, 35); CatBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); CatBtn.Text = "▼ " .. name; CatBtn.TextColor3 = Color3.new(1,1,1); CatBtn.Font = Enum.Font.SourceSansBold; CatBtn.TextSize = 14
+    Instance.new("UICorner", CatBtn).CornerRadius = UDim.new(0, 6)
+    local SubFrame = Instance.new("Frame", ContentFrame); SubFrame.Size = UDim2.new(0.95, 0, 0, 0); SubFrame.BackgroundTransparency = 1; SubFrame.ClipsDescendants = true; SubFrame.Visible = false
+    local SL = Instance.new("UIListLayout", SubFrame); SL.Padding = UDim.new(0, 5); SL.HorizontalAlignment = Enum.HorizontalAlignment.Center
+    local open = false
+    CatBtn.MouseButton1Click:Connect(function()
+        open = not open; SubFrame.Visible = open; CatBtn.Text = (open and "▲ " or "▼ ") .. name
+        TweenService:Create(SubFrame, TweenInfo.new(0.3), {Size = open and UDim2.new(0.95, 0, 0, SL.AbsoluteContentSize.Y + 5) or UDim2.new(0.95, 0, 0, 0)}):Play()
+    end)
+    return SubFrame
+end
+
+local function CreateButton(name, parent, callback)
+    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0.9, 0, 0, 35); btn.Text = name .. ": OFF"; btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); btn.TextColor3 = Color3.new(1,1,1); btn.Font = Enum.Font.SourceSansBold; btn.TextSize = 13
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    local active = false
+    btn.MouseButton1Click:Connect(function()
+        active = not active; btn.Text = name .. ": " .. (active and "ON" or "OFF")
+        btn.BackgroundColor3 = active and Color3.fromRGB(180, 0, 0) or Color3.fromRGB(30, 30, 30)
+        callback(active)
+    end)
+end
+
+
+
+-- 1. FUNGSI GET KEY (COPY LINK)
+GetBtn.MouseButton1Click:Connect(function()
+    setclipboard(KeyURL) -- Nyalin link ke HP/PC user
+    GetBtn.Text = "LINK COPIED!"
+    task.wait(2)
+    GetBtn.Text = "GET KEY"
+end)
+
+-- 2. FUNGSI CHECK KEY
+CheckBtn.MouseButton1Click:Connect(function()
+    if Box.Text == CorrectKey then
+        writefile(FileName, Box.Text) -- Simpen key biar besok gratis
+        ScreenGui:Destroy()
+        Start_YutaHub()
+    else
+        Box.Text = ""
+        Box.PlaceholderText = "INVALID KEY!"
+        Box.PlaceholderColor3 = Color3.new(1, 0, 0)
+    end
+end)
+
+-- 3. CEK APAKAH SUDAH ADA KEY TERSIMPAN
+local function Init()
+    if isfile(FileName) then
+        local saved = readfile(FileName)
+        if saved == CorrectKey then
+            Start_YutaHub()
+            return
+        end
+    end
+    ScreenGui.Enabled = true -- Munculin UI kalau belum ada key
+end
+
+Init()
