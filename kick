@@ -1,8 +1,8 @@
 -- [[ 1. CONFIGURATION & COLOR DESIGN ]] --
 local Config = {
-    CorrectKey = "2",
+    CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V2.5-PREMIUM_TAB",
+    Version = "V2.6-MINIMIZE_UI",
     BoxColor = Color3.fromRGB(255, 0, 50) -- Merah neon khas Yuta
 }
 
@@ -18,6 +18,25 @@ end
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "YutaHub_Premium"
 ScreenGui.ResetOnSpawn = false
+
+-- ==========================================
+-- TOMBOL BULAT KECIL (MINIMIZE LOGO) - MUNCUL SETELAH KEY SUKSES
+-- ==========================================
+local ToggleIcon = Instance.new("TextButton", ScreenGui)
+ToggleIcon.Size = UDim2.new(0, 45, 0, 45)
+ToggleIcon.Position = UDim2.new(0.02, 0, 0.2, 0) -- Di pojok kiri layar
+ToggleIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+ToggleIcon.Text = "Y" -- Logo Yuta
+ToggleIcon.TextColor3 = Config.BoxColor
+ToggleIcon.Font = Enum.Font.GothamBold
+ToggleIcon.TextSize = 18
+ToggleIcon.Visible = false -- Sembunyi di awal
+ToggleIcon.Active = true
+ToggleIcon.Draggable = true -- Tombol kecilnya bisa kamu geser biar ga halangin analog/mouse
+Instance.new("UICorner", ToggleIcon).CornerRadius = UDim.new(1, 0)
+local ToggleStroke = Instance.new("UIStroke", ToggleIcon)
+ToggleStroke.Color = Config.BoxColor
+ToggleStroke.Thickness = 1.5
 
 -- ==========================================
 -- KOTAK CANVAS KEY SYSTEM
@@ -79,7 +98,7 @@ local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 450, 0, 280)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-MainFrame.Visible = false 
+MainFrame.Visible = false -- Sembunyi total sampai icon di-klik
 MainFrame.Active = true      
 MainFrame.Draggable = true   
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -98,18 +117,14 @@ MainTitle.TextSize = 16
 MainTitle.TextXAlignment = Enum.TextXAlignment.Left
 MainTitle.BackgroundTransparency = 1
 
--- ==========================================
 -- SISI KIRI: PANEL NAVIGASI TAB
--- ==========================================
 local TabPanel = Instance.new("Frame", MainFrame)
 TabPanel.Size = UDim2.new(0, 110, 1, -60)
 TabPanel.Position = UDim2.new(0, 10, 0, 50)
 TabPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 Instance.new("UICorner", TabPanel).CornerRadius = UDim.new(0, 6)
 
--- ==========================================
 -- SISI KANAN: PANEL WADAH KONTEN (CONTAINER)
--- ==========================================
 local Container = Instance.new("Frame", MainFrame)
 Container.Size = UDim2.new(1, -140, 1, -60)
 Container.Position = UDim2.new(0, 130, 0, 50)
@@ -143,20 +158,17 @@ local PageMain = CreatePage("Main", "TAB UTAMA FARM")
 local PageESP = CreatePage("ESP", "TAB ESP & COMBAT")
 local PageStats = CreatePage("Stats", "TAB AUTO STATS")
 
--- Tambahan teks tutorial di halaman Main
 local TutorialText = Instance.new("TextLabel", PageMain)
 TutorialText.Size = UDim2.new(1, -20, 1, -50)
 TutorialText.Position = UDim2.new(0, 10, 0, 40)
-TutorialText.Text = "Struktur GUI Berhasil!\n\nSilakan klik tombol kategori di sebelah kiri untuk berpindah tab secara instan.\n\nTekan 'INSERT' di keyboard laptop untuk menyembunyikan menu."
+TutorialText.Text = "Sistem Minimize Berhasil!\n\nKlik kembali tombol bulat 'Y' di pojok layar kapan saja untuk menyembunyikan kotak besar ini.\n\nShortcut keyboard 'INSERT' juga tetap aktif digunakan."
 TutorialText.TextColor3 = Color3.fromRGB(150, 150, 150)
 TutorialText.Font = Enum.Font.Gotham
 TutorialText.TextSize = 12
 TutorialText.TextWrapped = true
 TutorialText.BackgroundTransparency = 1
 
--- ==========================================
--- LOGIKA TOMBOL DAN PERPINDAHAN TAB
--- ==========================================
+-- LOGIKA PERPINDAHAN TAB
 local TabListLayout = Instance.new("UIListLayout", TabPanel)
 TabListLayout.Padding = UDim.new(0, 5)
 
@@ -181,12 +193,9 @@ local function AddTabButton(name)
     end)
 end
 
--- DAFTARKAN BUTTON PADA PANEL KIRI
 AddTabButton("Main")
 AddTabButton("ESP")
 AddTabButton("Stats")
-
--- Tampilkan Tab Pertama secara Bawaan
 SwitchTab("Main")
 
 -- ==========================================
@@ -194,12 +203,19 @@ SwitchTab("Main")
 -- ==========================================
 local UserInputService = game:GetService("UserInputService")
 
+-- Alur eksekusi saat Kunci Benar
 local function UnlockMenu()
     KeyFrame.Visible = false
-    MainFrame.Visible = true
+    ToggleIcon.Visible = true -- HANYA MEMUNCULKAN TOMBOL KECIL "Y" DI AWAL!
+    print("YutaHub: Sukses diverifikasi! Klik tombol bulat 'Y' untuk membuka fitur.")
 end
 
--- Sembunyikan/Tampilkan Menu Utama menggunakan Tombol INSERT
+-- Aksi Klik Tombol Bulat "Y" (Buka / Tutup Kotak Besar)
+ToggleIcon.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+-- Shortcut Keyboard (INSERT) tetap berfungsi sebagai alternatif
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
