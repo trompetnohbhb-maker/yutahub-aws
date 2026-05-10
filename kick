@@ -2,14 +2,17 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V3.0-OWN_ESP",
-    ESP_Enabled = false -- Dikendalikan langsung oleh sakelar UI
+    Version = "V3.7-CYAN_BOX_FIX",
+    ESP_Enabled = false,
+    
+    -- Tema Utama UI (Merah Neon Yuta)
+    UI_Color = Color3.fromRGB(255, 0, 50) 
 }
 
--- Pengaturan Variabel Orisinal Milikmu
+-- Pengaturan Variabel ESP Orisinal Milikmu
 local Settings = {
-    BoxColor = Color3.fromRGB(0, 255, 255),
-    TextColor = Color3.fromRGB(255, 255, 255),
+    BoxColor = Color3.fromRGB(0, 255, 255), -- CYAN NEON MUTLAK
+    TextColor = Color3.fromRGB(255, 255, 255), -- TEKS PUTIH
     HealthBar = true,
     Distance = true
 }
@@ -35,7 +38,7 @@ ToggleIcon.Size = UDim2.new(0, 45, 0, 45)
 ToggleIcon.Position = UDim2.new(0, 15, 0, 150)
 ToggleIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 ToggleIcon.Text = "Y"
-ToggleIcon.TextColor3 = Settings.BoxColor
+ToggleIcon.TextColor3 = Config.UI_Color
 ToggleIcon.Font = Enum.Font.GothamBold
 ToggleIcon.TextSize = 18
 ToggleIcon.Visible = false
@@ -43,7 +46,7 @@ ToggleIcon.Active = true
 ToggleIcon.Draggable = true 
 Instance.new("UICorner", ToggleIcon).CornerRadius = UDim.new(1, 0)
 local ToggleStroke = Instance.new("UIStroke", ToggleIcon)
-ToggleStroke.Color = Settings.BoxColor
+ToggleStroke.Color = Config.UI_Color
 ToggleStroke.Thickness = 1.5
 
 -- KOTAK CANVAS KEY SYSTEM
@@ -55,7 +58,7 @@ KeyFrame.Active = true
 KeyFrame.Draggable = true   
 Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 8)
 local KeyStroke = Instance.new("UIStroke", KeyFrame)
-KeyStroke.Color = Settings.BoxColor
+KeyStroke.Color = Config.UI_Color
 KeyStroke.Thickness = 1.5
 
 local KeyTitle = Instance.new("TextLabel", KeyFrame)
@@ -81,7 +84,7 @@ local CheckBtn = Instance.new("TextButton", KeyFrame)
 CheckBtn.Size = UDim2.new(0, 135, 0, 35)
 CheckBtn.Position = UDim2.new(0.1, 0, 0.7, 0)
 CheckBtn.Text = "CHECK KEY"
-CheckBtn.BackgroundColor3 = Settings.BoxColor
+CheckBtn.BackgroundColor3 = Config.UI_Color
 CheckBtn.TextColor3 = Color3.new(1,1,1)
 CheckBtn.Font = Enum.Font.GothamBold
 CheckBtn.TextSize = 14
@@ -107,7 +110,7 @@ MainFrame.Active = true
 MainFrame.Draggable = true   
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
-MainStroke.Color = Settings.BoxColor
+MainStroke.Color = Config.UI_Color
 MainStroke.Thickness = 1.5
 
 local MainTitle = Instance.new("TextLabel", MainFrame)
@@ -184,12 +187,12 @@ local function CreateDraw(obj, props)
 end
 
 local function AddPremiumESP(Player)
-    local Box = CreateDraw("Square", {Thickness = 1, Visible = false})
+    -- Membuat objek murni tanpa penambahan outline yang merusak warna
+    local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Visible = false})
     local HealthBar = CreateDraw("Line", {Thickness = 2, Visible = false})
-    local Info = CreateDraw("Text", {Size = 13, Center = true, Outline = true, Visible = false})
+    local Info = CreateDraw("Text", {Size = 13, Center = true, Outline = true, Font = 2, Color = Settings.TextColor, Visible = false})
 
     RunService.RenderStepped:Connect(function()
-        -- Jembatan kontrol sakelar utama
         if Config.ESP_Enabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player ~= LocalPlayer then
             local Hum = Player.Character:FindFirstChildOfClass("Humanoid")
             local Root = Player.Character.HumanoidRootPart
@@ -200,38 +203,35 @@ local function AddPremiumESP(Player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                -- 1. BOX
+                -- 1. BOX (Warna Cyan Sesuai Settings Variabel)
                 Box.Size = BoxSize
                 Box.Position = BoxPos
-                Box.Color = Settings.BoxColor
+                Box.Color = Settings.BoxColor 
                 Box.Visible = true
 
                 -- 2. PREMIUM HEALTH BAR
                 if Settings.HealthBar then
-                    local HealthOffset = (Hum.Health / Hum.MaxHealth) * BoxSize.Y
+                    local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
+                    local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
                     HealthBar.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y)
                     HealthBar.To = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y - HealthOffset)
-                    HealthBar.Color = Color3.fromRGB(255 - (255 * (Hum.Health/Hum.MaxHealth)), 255 * (Hum.Health/Hum.MaxHealth), 0)
+                    HealthBar.Color = Color3.fromRGB(255 - (255 * (Hum.Health/MaxHealth)), 255 * (Hum.Health/MaxHealth), 0)
                     HealthBar.Visible = true
                 end
 
-                -- 3. INFO
+                -- 3. INFO (Nama & Jarak Melayang di Atas Kepala)
                 if Settings.Distance then
                     local Dist = math.floor((Root.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
-                    Info.Text = Player.Name .. " | " .. Dist .. "m"
-                    Info.Position = Vector2.new(Pos.X, BoxPos.Y + BoxSize.Y + 5)
-                    Info.Color = Settings.TextColor
+                    Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
+                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
+                    Info.Color = Settings.TextColor 
                     Info.Visible = true
                 end
             else
-                Box.Visible = false
-                HealthBar.Visible = false
-                Info.Visible = false
+                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
             end
         else
-            Box.Visible = false
-            HealthBar.Visible = false
-            Info.Visible = false
+            Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
         end
     end)
 end
@@ -261,15 +261,12 @@ AddTabButton("ESP")
 AddTabButton("Stats")
 SwitchTab("Main")
 
--- ==========================================
 -- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
--- ==========================================
 local UserInputService = game:GetService("UserInputService")
 
 local function UnlockMenu()
     KeyFrame.Visible = false
     ToggleIcon.Visible = true
-    -- Menjalankan listener scanner orisinal milikmu
     for _, v in pairs(Players:GetPlayers()) do AddPremiumESP(v) end
     Players.PlayerAdded:Connect(AddPremiumESP)
 end
@@ -283,7 +280,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Kendali Tombol Sakelar Terintegrasi ke ESP Milikmu
+-- Sakelar On/Off ESP
 ESPToggle.MouseButton1Click:Connect(function()
     Config.ESP_Enabled = not Config.ESP_Enabled
     if Config.ESP_Enabled then
