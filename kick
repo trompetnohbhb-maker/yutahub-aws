@@ -2,12 +2,19 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V2.6-MINIMIZE_UI",
-    BoxColor = Color3.fromRGB(255, 0, 50) -- Merah neon khas Yuta
+    Version = "V2.7-ESP_ACTIVE",
+    BoxColor = Color3.fromRGB(255, 0, 50), -- Merah neon khas Yuta
+    TextColor = Color3.fromRGB(255, 255, 255),
+    
+    -- Status Fitur (Kondisi Awal)
+    ESP_Enabled = false,
+    TeamCheck = true
 }
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
 
 if PlayerGui:FindFirstChild("YutaHub_Premium") then 
@@ -20,19 +27,19 @@ ScreenGui.Name = "YutaHub_Premium"
 ScreenGui.ResetOnSpawn = false
 
 -- ==========================================
--- TOMBOL BULAT KECIL (MINIMIZE LOGO) - MUNCUL SETELAH KEY SUKSES
+-- TOMBOL BULAT KECIL (MINIMIZE LOGO)
 -- ==========================================
 local ToggleIcon = Instance.new("TextButton", ScreenGui)
 ToggleIcon.Size = UDim2.new(0, 45, 0, 45)
-ToggleIcon.Position = UDim2.new(0.02, 0, 0.2, 0) -- Di pojok kiri layar
+ToggleIcon.Position = UDim2.new(0, 15, 0, 150)
 ToggleIcon.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-ToggleIcon.Text = "Y" -- Logo Yuta
+ToggleIcon.Text = "Y"
 ToggleIcon.TextColor3 = Config.BoxColor
 ToggleIcon.Font = Enum.Font.GothamBold
 ToggleIcon.TextSize = 18
-ToggleIcon.Visible = false -- Sembunyi di awal
+ToggleIcon.Visible = false
 ToggleIcon.Active = true
-ToggleIcon.Draggable = true -- Tombol kecilnya bisa kamu geser biar ga halangin analog/mouse
+ToggleIcon.Draggable = true 
 Instance.new("UICorner", ToggleIcon).CornerRadius = UDim.new(1, 0)
 local ToggleStroke = Instance.new("UIStroke", ToggleIcon)
 ToggleStroke.Color = Config.BoxColor
@@ -92,13 +99,13 @@ GetBtn.TextSize = 14
 Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
 -- ==========================================
--- KOTAK CANVAS MENU UTAMA (PREMIUM SYSTEM)
+-- KOTAK CANVAS MENU UTAMA
 -- ==========================================
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 450, 0, 280)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-MainFrame.Visible = false -- Sembunyi total sampai icon di-klik
+MainFrame.Visible = false 
 MainFrame.Active = true      
 MainFrame.Draggable = true   
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
@@ -106,7 +113,6 @@ local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Config.BoxColor
 MainStroke.Thickness = 1.5
 
--- TITLE BAR ATAS
 local MainTitle = Instance.new("TextLabel", MainFrame)
 MainTitle.Size = UDim2.new(1, -20, 0, 40)
 MainTitle.Position = UDim2.new(0, 15, 0, 5)
@@ -134,48 +140,158 @@ Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
 -- FOLDER HALAMAN (PAGE WADAH)
 local TabPages = {}
 
-local function CreatePage(name, textDisplay)
+local function CreatePage(name)
     local Page = Instance.new("Frame", Container)
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.Visible = false
-    
-    local Label = Instance.new("TextLabel", Page)
-    Label.Size = UDim2.new(1, 0, 0, 40)
-    Label.Position = UDim2.new(0, 0, 0, 10)
-    Label.Text = textDisplay
-    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Label.Font = Enum.Font.GothamBold
-    Label.TextSize = 14
-    Label.BackgroundTransparency = 1
-
     TabPages[name] = Page
     return Page
 end
 
 -- RAKIT HALAMAN INTERNAL TAB
-local PageMain = CreatePage("Main", "TAB UTAMA FARM")
-local PageESP = CreatePage("ESP", "TAB ESP & COMBAT")
-local PageStats = CreatePage("Stats", "TAB AUTO STATS")
+local PageMain = CreatePage("Main")
+local PageESP = CreatePage("ESP")
+local PageStats = CreatePage("Stats")
 
-local TutorialText = Instance.new("TextLabel", PageMain)
-TutorialText.Size = UDim2.new(1, -20, 1, -50)
-TutorialText.Position = UDim2.new(0, 10, 0, 40)
-TutorialText.Text = "Sistem Minimize Berhasil!\n\nKlik kembali tombol bulat 'Y' di pojok layar kapan saja untuk menyembunyikan kotak besar ini.\n\nShortcut keyboard 'INSERT' juga tetap aktif digunakan."
-TutorialText.TextColor3 = Color3.fromRGB(150, 150, 150)
-TutorialText.Font = Enum.Font.Gotham
-TutorialText.TextSize = 12
-TutorialText.TextWrapped = true
-TutorialText.BackgroundTransparency = 1
+-- ISI KONTEN TAB MAIN
+local MainText = Instance.new("TextLabel", PageMain)
+MainText.Size = UDim2.new(1, -20, 1, -20)
+MainText.Position = UDim2.new(0, 10, 0, 10)
+MainText.Text = "Selamat Datang di YutaHub V2!\n\nSilakan buka tab 'ESP' di sebelah kiri untuk mengaktifkan sistem pelacakan target.\n\nFungsi Auto-Farm Blox Fruit akan segera hadir di halaman ini."
+MainText.TextColor3 = Color3.fromRGB(160, 160, 160)
+MainText.Font = Enum.Font.Gotham
+MainText.TextSize = 13
+MainText.TextWrapped = true
+MainText.BackgroundTransparency = 1
 
--- LOGIKA PERPINDAHAN TAB
+-- ISI KONTEN TAB STATS (KOSONGAN)
+local StatsText = Instance.new("TextLabel", PageStats)
+StatsText.Size = UDim2.new(1, 0, 1, 0)
+StatsText.Text = "[ Tab Stats Belum Diisi ]"
+StatsText.TextColor3 = Color3.fromRGB(80, 80, 80)
+StatsText.Font = Enum.Font.GothamBold
+StatsText.TextSize = 14
+StatsText.BackgroundTransparency = 1
+
+-- ==========================================
+-- RAKIT TOMBOL SAKELAR DI DALAM TAB ESP
+-- ==========================================
+local ESPToggle = Instance.new("TextButton", PageESP)
+ESPToggle.Size = UDim2.new(1, -20, 0, 45)
+ESPToggle.Position = UDim2.new(0, 10, 0, 20)
+ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+ESPToggle.Text = "PLAYER ESP: OFF"
+ESPToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+ESPToggle.Font = Enum.Font.GothamBold
+ESPToggle.TextSize = 13
+Instance.new("UICorner", ESPToggle).CornerRadius = UDim.new(0, 6)
+local ESPStroke = Instance.new("UIStroke", ESPToggle)
+ESPStroke.Color = Color3.fromRGB(50, 50, 50)
+ESPStroke.Thickness = 1.5
+
+local TeamToggle = Instance.new("TextButton", PageESP)
+TeamToggle.Size = UDim2.new(1, -20, 0, 45)
+TeamToggle.Position = UDim2.new(0, 10, 0, 80)
+TeamToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+TeamToggle.Text = "TEAM CHECK: ON"
+TeamToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+TeamToggle.Font = Enum.Font.GothamBold
+TeamToggle.TextSize = 13
+Instance.new("UICorner", TeamToggle).CornerRadius = UDim.new(0, 6)
+local TeamStroke = Instance.new("UIStroke", TeamToggle)
+TeamStroke.Color = Color3.fromRGB(0, 255, 100)
+TeamStroke.Thickness = 1.5
+
+-- ==========================================
+-- [[ 3. HIGH-UNC ENGINE DRAWING ESP ]] --
+-- ==========================================
+local ActiveESP = {}
+
+local function ClearESP(player)
+    if ActiveESP[player] then
+        for _, drawObj in pairs(ActiveESP[player]) do drawObj:Remove() end
+        ActiveESP[player] = nil
+    end
+end
+
+local function StartESP(player)
+    if player == LocalPlayer then return end
+    
+    local Box = Drawing.new("Square")
+    Box.Thickness = 1
+    Box.Visible = false
+    
+    local HealthBar = Drawing.new("Line")
+    HealthBar.Thickness = 2
+    HealthBar.Visible = false
+    
+    local Info = Drawing.new("Text")
+    Info.Size = 13
+    Info.Center = true
+    Info.Outline = true
+    Info.Visible = false
+
+    ActiveESP[player] = {Box, HealthBar, Info}
+
+    local RenderConn
+    RenderConn = RunService.RenderStepped:Connect(function()
+        local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        
+        if Config.ESP_Enabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and MyRoot then
+            -- Kondisi Jika Team Check Aktif
+            if Config.TeamCheck and player.Team == LocalPlayer.Team then
+                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false; return
+            end
+
+            local Hum = player.Character:FindFirstChildOfClass("Humanoid")
+            local Root = player.Character.HumanoidRootPart
+            local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
+
+            if OnScreen and Hum and Hum.Health > 0 then
+                local Size = 2000 / Pos.Z
+                local BoxSize = Vector2.new(Size, Size * 1.5)
+                local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
+                
+                -- Kotak Box
+                Box.Size = BoxSize
+                Box.Position = BoxPos
+                Box.Color = Config.BoxColor
+                Box.Visible = true
+
+                -- Bar Darah Dinamis (Hijau -> Merah)
+                local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
+                local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
+                HealthBar.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y)
+                HealthBar.To = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y - HealthOffset)
+                HealthBar.Color = Color3.fromRGB(255 - (255 * (Hum.Health/MaxHealth)), 255 * (Hum.Health/MaxHealth), 0)
+                HealthBar.Visible = true
+
+                -- Teks Nama + Jarak
+                local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
+                Info.Text = player.Name .. " [" .. Dist .. "m]"
+                Info.Position = Vector2.new(Pos.X, BoxPos.Y + BoxSize.Y + 5)
+                Info.Color = Config.TextColor
+                Info.Visible = true
+            else
+                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+            end
+        else
+            Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+            if not Players:FindFirstChild(player.Name) then
+                ClearESP(player)
+                RenderConn:Disconnect()
+            end
+        end
+    end)
+end
+
+-- LOGIKA PERPINDAHAN TAB SIDEBAR
 local TabListLayout = Instance.new("UIListLayout", TabPanel)
 TabListLayout.Padding = UDim.new(0, 5)
 
 local function SwitchTab(tabName)
-    for name, page in pairs(TabPages) do
-        page.Visible = (name == tabName)
-    end
+    for name, page in pairs(TabPages) do page.Visible = (name == tabName) end
 end
 
 local function AddTabButton(name)
@@ -187,10 +303,7 @@ local function AddTabButton(name)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
     Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
-    
-    Btn.MouseButton1Click:Connect(function()
-        SwitchTab(name)
-    end)
+    Btn.MouseButton1Click:Connect(function() SwitchTab(name) end)
 end
 
 AddTabButton("Main")
@@ -199,27 +312,53 @@ AddTabButton("Stats")
 SwitchTab("Main")
 
 -- ==========================================
--- [[ 3. LOGIKA UTAMA INTERAKSI ]] --
+-- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
 -- ==========================================
 local UserInputService = game:GetService("UserInputService")
 
--- Alur eksekusi saat Kunci Benar
 local function UnlockMenu()
     KeyFrame.Visible = false
-    ToggleIcon.Visible = true -- HANYA MEMUNCULKAN TOMBOL KECIL "Y" DI AWAL!
-    print("YutaHub: Sukses diverifikasi! Klik tombol bulat 'Y' untuk membuka fitur.")
+    ToggleIcon.Visible = true
+    -- Inisialisasi basis data gambar ESP di latar belakang
+    for _, p in pairs(Players:GetPlayers()) do StartESP(p) end
+    Players.PlayerAdded:Connect(StartESP)
+    Players.PlayerRemoving:Connect(ClearESP)
 end
 
--- Aksi Klik Tombol Bulat "Y" (Buka / Tutup Kotak Besar)
-ToggleIcon.MouseButton1Click:Connect(function()
-    MainFrame.Visible = not MainFrame.Visible
-end)
+ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
 
--- Shortcut Keyboard (INSERT) tetap berfungsi sebagai alternatif
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
         MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+-- Interaksi Tombol Sakelar ESP
+ESPToggle.MouseButton1Click:Connect(function()
+    Config.ESP_Enabled = not Config.ESP_Enabled
+    if Config.ESP_Enabled then
+        ESPToggle.Text = "PLAYER ESP: ON"
+        ESPToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        ESPStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        ESPToggle.Text = "PLAYER ESP: OFF"
+        ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        ESPStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Interaksi Tombol Team Check
+TeamToggle.MouseButton1Click:Connect(function()
+    Config.TeamCheck = not Config.TeamCheck
+    if Config.TeamCheck then
+        TeamToggle.Text = "TEAM CHECK: ON"
+        TeamToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        TeamStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        TeamToggle.Text = "TEAM CHECK: OFF"
+        TeamToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+        TeamStroke.Color = Color3.fromRGB(255, 0, 50)
     end
 end)
 
