@@ -2,17 +2,17 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V4.1-WHITE_ESP",
+    Version = "V4.2-BOX_EMPTY",
     ESP_Enabled = false,
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
 }
 
--- Pengaturan Variabel Engine ESP (FULL WHITE EDITION)
+-- Pengaturan Variabel Engine ESP (BORDER PUTIH + KOSONG DALAM)
 local Settings = {
-    BoxColor = Color3.fromRGB(255, 255, 255), -- FULL PUTIH
-    TextColor = Color3.fromRGB(255, 255, 255), -- FULL PUTIH
+    BoxColor = Color3.fromRGB(255, 255, 255), -- GARIS PINGGIR PUTIH
+    TextColor = Color3.fromRGB(255, 255, 255), -- TEKS PUTIH
     HealthBar = true,
     Distance = true
 }
@@ -178,7 +178,7 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. WHITE PREMIUM HIGH-UNC ESP ENGINE ]] --
+-- [[ 3. FIXED TRANSPARENT BOX ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -198,10 +198,9 @@ end
 local function AddPremiumESP(Player)
     if Player == LocalPlayer then return end
 
-    -- Render Layer Outline Hitam Luar (Penjaga kontras visual)
-    local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Visible = false})
-    -- Render Layer Kotak Inti (Murni Putih Bersih)
-    local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Visible = false})
+    -- FIX: Memaksa isi tengah kotak kosong (Filled = false)
+    local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Filled = false, Transprency = 1, Visible = false})
+    local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Filled = false, Transprency = 1, Visible = false})
     
     local HealthOutline = CreateDraw("Line", {Thickness = 4, Color = Color3.fromRGB(0,0,0), Visible = false})
     local HealthBar = CreateDraw("Line", {Thickness = 2, Visible = false})
@@ -222,7 +221,7 @@ local function AddPremiumESP(Player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                -- 1. BOX PREMIUM (White + Shadow Outline)
+                -- 1. BOX BENING TRANSPARAN (Hanya garis tepi putih)
                 BoxOutline.Size = BoxSize
                 BoxOutline.Position = BoxPos
                 BoxOutline.Visible = true
@@ -231,7 +230,7 @@ local function AddPremiumESP(Player)
                 Box.Position = BoxPos
                 Box.Visible = true
 
-                -- 2. WHITE HEALTH BAR DOUBLE-LAYER
+                -- 2. HEALTH BAR MURNI PUTIH DI SAMPING KOTAK
                 if Settings.HealthBar then
                     local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
                     local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
@@ -242,12 +241,11 @@ local function AddPremiumESP(Player)
 
                     HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
                     HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
-                    -- Diubah dari indikator warna menjadi murni putih mengikuti tema request
-                    HealthBar.Color = Settings.BoxColor 
+                    HealthBar.Color = Settings.BoxColor -- Ikut Putih Bersih
                     HealthBar.Visible = true
                 end
 
-                -- 3. TEXT INFO (Melayang Diatas Kepala - Putih Bersih)
+                -- 3. TEKS INFO NAMA + JARAK METER (Di Atas Kepala Target)
                 if Settings.Distance then
                     local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
                     Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
