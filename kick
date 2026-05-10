@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V2.7-ESP_ACTIVE",
+    Version = "V2.8-PREMIUM_ESP",
     BoxColor = Color3.fromRGB(255, 0, 50), -- Merah neon khas Yuta
     TextColor = Color3.fromRGB(255, 255, 255),
     
@@ -26,9 +26,7 @@ local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "YutaHub_Premium"
 ScreenGui.ResetOnSpawn = false
 
--- ==========================================
 -- TOMBOL BULAT KECIL (MINIMIZE LOGO)
--- ==========================================
 local ToggleIcon = Instance.new("TextButton", ScreenGui)
 ToggleIcon.Size = UDim2.new(0, 45, 0, 45)
 ToggleIcon.Position = UDim2.new(0, 15, 0, 150)
@@ -45,9 +43,7 @@ local ToggleStroke = Instance.new("UIStroke", ToggleIcon)
 ToggleStroke.Color = Config.BoxColor
 ToggleStroke.Thickness = 1.5
 
--- ==========================================
 -- KOTAK CANVAS KEY SYSTEM
--- ==========================================
 local KeyFrame = Instance.new("Frame", ScreenGui)
 KeyFrame.Size = UDim2.new(0, 340, 0, 180)
 KeyFrame.Position = UDim2.new(0.5, -170, 0.5, -90)
@@ -98,9 +94,7 @@ GetBtn.Font = Enum.Font.GothamBold
 GetBtn.TextSize = 14
 Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
--- ==========================================
 -- KOTAK CANVAS MENU UTAMA
--- ==========================================
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 450, 0, 280)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
@@ -139,7 +133,6 @@ Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
 
 -- FOLDER HALAMAN (PAGE WADAH)
 local TabPages = {}
-
 local function CreatePage(name)
     local Page = Instance.new("Frame", Container)
     Page.Size = UDim2.new(1, 0, 1, 0)
@@ -149,12 +142,11 @@ local function CreatePage(name)
     return Page
 end
 
--- RAKIT HALAMAN INTERNAL TAB
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
 local PageStats = CreatePage("Stats")
 
--- ISI KONTEN TAB MAIN
+-- KONTEN TAB MAIN
 local MainText = Instance.new("TextLabel", PageMain)
 MainText.Size = UDim2.new(1, -20, 1, -20)
 MainText.Position = UDim2.new(0, 10, 0, 10)
@@ -165,23 +157,12 @@ MainText.TextSize = 13
 MainText.TextWrapped = true
 MainText.BackgroundTransparency = 1
 
--- ISI KONTEN TAB STATS (KOSONGAN)
-local StatsText = Instance.new("TextLabel", PageStats)
-StatsText.Size = UDim2.new(1, 0, 1, 0)
-StatsText.Text = "[ Tab Stats Belum Diisi ]"
-StatsText.TextColor3 = Color3.fromRGB(80, 80, 80)
-StatsText.Font = Enum.Font.GothamBold
-StatsText.TextSize = 14
-StatsText.BackgroundTransparency = 1
-
--- ==========================================
--- RAKIT TOMBOL SAKELAR DI DALAM TAB ESP
--- ==========================================
+-- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
 ESPToggle.Size = UDim2.new(1, -20, 0, 45)
 ESPToggle.Position = UDim2.new(0, 10, 0, 20)
 ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ESPToggle.Text = "PLAYER ESP: OFF"
+ESPToggle.Text = "ULTRA PREMIUM ESP: OFF"
 ESPToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 ESPToggle.Font = Enum.Font.GothamBold
 ESPToggle.TextSize = 13
@@ -204,7 +185,7 @@ TeamStroke.Color = Color3.fromRGB(0, 255, 100)
 TeamStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. HIGH-UNC ENGINE DRAWING ESP ]] --
+-- [[ 3. ULTRA-PREMIUM ANTIALIASING ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -218,30 +199,46 @@ end
 local function StartESP(player)
     if player == LocalPlayer then return end
     
+    -- Pembuatan Lapisan Garis Box Luar (Bayangan Hitam/Outline)
+    local BoxOutline = Drawing.new("Square")
+    BoxOutline.Thickness = 3
+    BoxOutline.Color = Color3.fromRGB(0, 0, 0)
+    BoxOutline.Visible = false
+    
+    -- Kotak Inti Dalam (Merah Neon)
     local Box = Drawing.new("Square")
     Box.Thickness = 1
+    Box.Color = Config.BoxColor
     Box.Visible = false
     
+    -- Bar Darah Luar (Outline Hitam)
+    local HealthOutline = Drawing.new("Line")
+    HealthOutline.Thickness = 4
+    HealthOutline.Color = Color3.fromRGB(0, 0, 0)
+    HealthOutline.Visible = false
+
+    -- Bar Darah Dalam (Dinamis)
     local HealthBar = Drawing.new("Line")
     HealthBar.Thickness = 2
     HealthBar.Visible = false
     
+    -- Teks Nama Modern
     local Info = Drawing.new("Text")
     Info.Size = 13
     Info.Center = true
     Info.Outline = true
+    Info.Font = 2 -- FONT MONOSPACE: Sangat tajam di resolusi laptop apa pun
     Info.Visible = false
 
-    ActiveESP[player] = {Box, HealthBar, Info}
+    ActiveESP[player] = {BoxOutline, Box, HealthOutline, HealthBar, Info}
 
     local RenderConn
     RenderConn = RunService.RenderStepped:Connect(function()
         local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         
         if Config.ESP_Enabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and MyRoot then
-            -- Kondisi Jika Team Check Aktif
             if Config.TeamCheck and player.Team == LocalPlayer.Team then
-                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false; return
+                BoxOutline.Visible = false; Box.Visible = false; HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false; return
             end
 
             local Hum = player.Character:FindFirstChildOfClass("Humanoid")
@@ -253,31 +250,39 @@ local function StartESP(player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
                 
-                -- Kotak Box
+                -- Render Box + Outline (Membuat visual box terlihat HD & Tebal)
+                BoxOutline.Size = BoxSize
+                BoxOutline.Position = BoxPos
+                BoxOutline.Visible = true
+
                 Box.Size = BoxSize
                 Box.Position = BoxPos
-                Box.Color = Config.BoxColor
                 Box.Visible = true
 
-                -- Bar Darah Dinamis (Hijau -> Merah)
+                -- Render Bar Darah Double-Layer
                 local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
                 local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
-                HealthBar.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y)
-                HealthBar.To = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y - HealthOffset)
+                
+                HealthOutline.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                HealthOutline.To = Vector2.new(BoxPos.X - 6, BoxPos.Y)
+                HealthOutline.Visible = true
+
+                HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
                 HealthBar.Color = Color3.fromRGB(255 - (255 * (Hum.Health/MaxHealth)), 255 * (Hum.Health/MaxHealth), 0)
                 HealthBar.Visible = true
 
-                -- Teks Nama + Jarak
+                -- Render Teks Info Tajam
                 local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
-                Info.Text = player.Name .. " [" .. Dist .. "m]"
-                Info.Position = Vector2.new(Pos.X, BoxPos.Y + BoxSize.Y + 5)
+                Info.Text = string.upper(player.Name) .. " [" .. Dist .. "M]"
+                Info.Position = Vector2.new(Pos.X, BoxPos.Y - 18) -- Dipindahkan ke ATAS kepala agar rapi
                 Info.Color = Config.TextColor
                 Info.Visible = true
             else
-                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+                BoxOutline.Visible = false; Box.Visible = false; HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
             end
         else
-            Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+            BoxOutline.Visible = false; Box.Visible = false; HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
             if not Players:FindFirstChild(player.Name) then
                 ClearESP(player)
                 RenderConn:Disconnect()
@@ -286,7 +291,7 @@ local function StartESP(player)
     end)
 end
 
--- LOGIKA PERPINDAHAN TAB SIDEBAR
+-- LOGIKA PERPINDAHAN TAB
 local TabListLayout = Instance.new("UIListLayout", TabPanel)
 TabListLayout.Padding = UDim.new(0, 5)
 
@@ -311,15 +316,12 @@ AddTabButton("ESP")
 AddTabButton("Stats")
 SwitchTab("Main")
 
--- ==========================================
--- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
--- ==========================================
+-- LOGIKA INTERAKSI TOMBOL
 local UserInputService = game:GetService("UserInputService")
 
 local function UnlockMenu()
     KeyFrame.Visible = false
     ToggleIcon.Visible = true
-    -- Inisialisasi basis data gambar ESP di latar belakang
     for _, p in pairs(Players:GetPlayers()) do StartESP(p) end
     Players.PlayerAdded:Connect(StartESP)
     Players.PlayerRemoving:Connect(ClearESP)
@@ -334,21 +336,19 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
--- Interaksi Tombol Sakelar ESP
 ESPToggle.MouseButton1Click:Connect(function()
     Config.ESP_Enabled = not Config.ESP_Enabled
     if Config.ESP_Enabled then
-        ESPToggle.Text = "PLAYER ESP: ON"
+        ESPToggle.Text = "ULTRA PREMIUM ESP: ON"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         ESPStroke.Color = Color3.fromRGB(0, 255, 100)
     else
-        ESPToggle.Text = "PLAYER ESP: OFF"
+        ESPToggle.Text = "ULTRA PREMIUM ESP: OFF"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         ESPStroke.Color = Color3.fromRGB(50, 50, 50)
     end
 end)
 
--- Interaksi Tombol Team Check
 TeamToggle.MouseButton1Click:Connect(function()
     Config.TeamCheck = not Config.TeamCheck
     if Config.TeamCheck then
