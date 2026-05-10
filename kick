@@ -2,17 +2,17 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V3.7-CYAN_BOX_FIX",
+    Version = "V4.1-WHITE_ESP",
     ESP_Enabled = false,
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
 }
 
--- Pengaturan Variabel ESP Orisinal Milikmu
+-- Pengaturan Variabel Engine ESP (FULL WHITE EDITION)
 local Settings = {
-    BoxColor = Color3.fromRGB(0, 255, 255), -- CYAN NEON MUTLAK
-    TextColor = Color3.fromRGB(255, 255, 255), -- TEKS PUTIH
+    BoxColor = Color3.fromRGB(255, 255, 255), -- FULL PUTIH
+    TextColor = Color3.fromRGB(255, 255, 255), -- FULL PUTIH
     HealthBar = true,
     Distance = true
 }
@@ -168,7 +168,7 @@ local ESPToggle = Instance.new("TextButton", PageESP)
 ESPToggle.Size = UDim2.new(1, -20, 0, 45)
 ESPToggle.Position = UDim2.new(0, 10, 0, 20)
 ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ESPToggle.Text = "PLAYER ESP: OFF"
+ESPToggle.Text = "WHITE PREMIUM ESP: OFF"
 ESPToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 ESPToggle.Font = Enum.Font.GothamBold
 ESPToggle.TextSize = 13
@@ -178,22 +178,41 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. MURNI MESIN ESP ASLI MILIKMU ]] --
+-- [[ 3. WHITE PREMIUM HIGH-UNC ESP ENGINE ]] --
 -- ==========================================
+local ActiveESP = {}
+
 local function CreateDraw(obj, props)
     local draw = Drawing.new(obj)
     for i, v in pairs(props) do draw[i] = v end
     return draw
 end
 
+local function ClearESP(player)
+    if ActiveESP[player] then
+        for _, drawObj in pairs(ActiveESP[player]) do drawObj:Remove() end
+        ActiveESP[player] = nil
+    end
+end
+
 local function AddPremiumESP(Player)
-    -- Membuat objek murni tanpa penambahan outline yang merusak warna
+    if Player == LocalPlayer then return end
+
+    -- Render Layer Outline Hitam Luar (Penjaga kontras visual)
+    local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Visible = false})
+    -- Render Layer Kotak Inti (Murni Putih Bersih)
     local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Visible = false})
+    
+    local HealthOutline = CreateDraw("Line", {Thickness = 4, Color = Color3.fromRGB(0,0,0), Visible = false})
     local HealthBar = CreateDraw("Line", {Thickness = 2, Visible = false})
+    
     local Info = CreateDraw("Text", {Size = 13, Center = true, Outline = true, Font = 2, Color = Settings.TextColor, Visible = false})
 
-    RunService.RenderStepped:Connect(function()
-        if Config.ESP_Enabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and Player ~= LocalPlayer then
+    local RenderConn
+    RenderConn = RunService.RenderStepped:Connect(function()
+        local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        
+        if Config.ESP_Enabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and MyRoot then
             local Hum = Player.Character:FindFirstChildOfClass("Humanoid")
             local Root = Player.Character.HumanoidRootPart
             local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
@@ -203,35 +222,49 @@ local function AddPremiumESP(Player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                -- 1. BOX (Warna Cyan Sesuai Settings Variabel)
+                -- 1. BOX PREMIUM (White + Shadow Outline)
+                BoxOutline.Size = BoxSize
+                BoxOutline.Position = BoxPos
+                BoxOutline.Visible = true
+
                 Box.Size = BoxSize
                 Box.Position = BoxPos
-                Box.Color = Settings.BoxColor 
                 Box.Visible = true
 
-                -- 2. PREMIUM HEALTH BAR
+                -- 2. WHITE HEALTH BAR DOUBLE-LAYER
                 if Settings.HealthBar then
                     local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
                     local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
-                    HealthBar.From = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y)
-                    HealthBar.To = Vector2.new(BoxPos.X - 5, BoxPos.Y + BoxSize.Y - HealthOffset)
-                    HealthBar.Color = Color3.fromRGB(255 - (255 * (Hum.Health/MaxHealth)), 255 * (Hum.Health/MaxHealth), 0)
+                    
+                    HealthOutline.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                    HealthOutline.To = Vector2.new(BoxPos.X - 6, BoxPos.Y)
+                    HealthOutline.Visible = true
+
+                    HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                    HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
+                    -- Diubah dari indikator warna menjadi murni putih mengikuti tema request
+                    HealthBar.Color = Settings.BoxColor 
                     HealthBar.Visible = true
                 end
 
-                -- 3. INFO (Nama & Jarak Melayang di Atas Kepala)
+                -- 3. TEXT INFO (Melayang Diatas Kepala - Putih Bersih)
                 if Settings.Distance then
-                    local Dist = math.floor((Root.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
+                    local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
                     Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
                     Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
-                    Info.Color = Settings.TextColor 
                     Info.Visible = true
                 end
             else
-                Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+                BoxOutline.Visible = false; Box.Visible = false
+                HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
             end
         else
-            Box.Visible = false; HealthBar.Visible = false; Info.Visible = false
+            BoxOutline.Visible = false; Box.Visible = false
+            HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
+            if not Players:FindFirstChild(Player.Name) then
+                ClearESP(Player)
+                RenderConn:Disconnect()
+            end
         end
     end)
 end
@@ -269,6 +302,7 @@ local function UnlockMenu()
     ToggleIcon.Visible = true
     for _, v in pairs(Players:GetPlayers()) do AddPremiumESP(v) end
     Players.PlayerAdded:Connect(AddPremiumESP)
+    Players.PlayerRemoving:Connect(ClearESP)
 end
 
 ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
@@ -284,11 +318,11 @@ end)
 ESPToggle.MouseButton1Click:Connect(function()
     Config.ESP_Enabled = not Config.ESP_Enabled
     if Config.ESP_Enabled then
-        ESPToggle.Text = "PLAYER ESP: ON"
+        ESPToggle.Text = "WHITE PREMIUM ESP: ON"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         ESPStroke.Color = Color3.fromRGB(0, 255, 100)
     else
-        ESPToggle.Text = "PLAYER ESP: OFF"
+        ESPToggle.Text = "WHITE PREMIUM ESP: OFF"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         ESPStroke.Color = Color3.fromRGB(50, 50, 50)
     end
