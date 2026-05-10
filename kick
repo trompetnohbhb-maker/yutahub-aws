@@ -1,24 +1,22 @@
 -- [[ 1. CONFIGURATION & COLOR DESIGN ]] --
 local Config = {
-    CorrectKey = "YUTABANKAI_2",
+    CorrectKey = "2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V2.1-UNIVERSAL_DRAG",
+    Version = "V2.5-PREMIUM_TAB",
     BoxColor = Color3.fromRGB(255, 0, 50) -- Merah neon khas Yuta
 }
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
-if not PlayerGui then return end
 
-if PlayerGui:FindFirstChild("YutaHub_UniversalTest") then 
-    PlayerGui.YutaHub_UniversalTest:Destroy() 
+if PlayerGui:FindFirstChild("YutaHub_Premium") then 
+    PlayerGui.YutaHub_Premium:Destroy() 
 end
 
 -- [[ 2. MAIN UNIVERSAL UI DESIGN ]] --
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
-ScreenGui.Name = "YutaHub_UniversalTest"
+ScreenGui.Name = "YutaHub_Premium"
 ScreenGui.ResetOnSpawn = false
 
 -- ==========================================
@@ -28,6 +26,8 @@ local KeyFrame = Instance.new("Frame", ScreenGui)
 KeyFrame.Size = UDim2.new(0, 340, 0, 180)
 KeyFrame.Position = UDim2.new(0.5, -170, 0.5, -90)
 KeyFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+KeyFrame.Active = true      
+KeyFrame.Draggable = true   
 Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 8)
 local KeyStroke = Instance.new("UIStroke", KeyFrame)
 KeyStroke.Color = Config.BoxColor
@@ -35,7 +35,7 @@ KeyStroke.Thickness = 1.5
 
 local KeyTitle = Instance.new("TextLabel", KeyFrame)
 KeyTitle.Size = UDim2.new(1, 0, 0, 45)
-KeyTitle.Text = "YUTA HUB | UNIVERSAL SYSTEM " .. Config.Version
+KeyTitle.Text = "YUTA HUB | KEY SYSTEM " .. Config.Version
 KeyTitle.TextColor3 = Color3.new(1,1,1)
 KeyTitle.Font = Enum.Font.GothamBold
 KeyTitle.TextSize = 13
@@ -73,84 +73,133 @@ GetBtn.TextSize = 14
 Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
 -- ==========================================
--- KOTAK CANVAS MENU UTAMA
+-- KOTAK CANVAS MENU UTAMA (PREMIUM SYSTEM)
 -- ==========================================
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 400, 0, 250)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
+MainFrame.Size = UDim2.new(0, 450, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Visible = false 
+MainFrame.Active = true      
+MainFrame.Draggable = true   
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 local MainStroke = Instance.new("UIStroke", MainFrame)
 MainStroke.Color = Config.BoxColor
 MainStroke.Thickness = 1.5
 
+-- TITLE BAR ATAS
 local MainTitle = Instance.new("TextLabel", MainFrame)
-MainTitle.Size = UDim2.new(1, 0, 0, 50)
-MainTitle.Text = "YUTA HUB MAIN MENU"
+MainTitle.Size = UDim2.new(1, -20, 0, 40)
+MainTitle.Position = UDim2.new(0, 15, 0, 5)
+MainTitle.Text = "YUTA HUB PREMIUM MENU"
 MainTitle.TextColor3 = Color3.new(1,1,1)
 MainTitle.Font = Enum.Font.GothamBold
-MainTitle.TextSize = 18
+MainTitle.TextSize = 16
+MainTitle.TextXAlignment = Enum.TextXAlignment.Left
 MainTitle.BackgroundTransparency = 1
 
-local TestStatusText = Instance.new("TextLabel", MainFrame)
-TestStatusText.Size = UDim2.new(0, 340, 0, 120)
-TestStatusText.Position = UDim2.new(0.5, -170, 0.35, 0)
-TestStatusText.Text = "✅ DRAG FUNCTION ACTIVE!\n\nSekarang kamu bisa menahan klik kiri mouse pada bagian atas menu ini untuk menggesernya sesuka hati.\n\nTekan 'INSERT' pada keyboard laptop untuk menyembunyikan menu."
-TestStatusText.TextColor3 = Color3.fromRGB(200, 200, 200)
-TestStatusText.Font = Enum.Font.Gotham
-TestStatusText.TextSize = 13
-TestStatusText.TextWrapped = true
-TestStatusText.BackgroundTransparency = 1
+-- ==========================================
+-- SISI KIRI: PANEL NAVIGASI TAB
+-- ==========================================
+local TabPanel = Instance.new("Frame", MainFrame)
+TabPanel.Size = UDim2.new(0, 110, 1, -60)
+TabPanel.Position = UDim2.new(0, 10, 0, 50)
+TabPanel.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+Instance.new("UICorner", TabPanel).CornerRadius = UDim.new(0, 6)
 
--- [[ 3. LUBANG LOGIKA DRAG UI (SMOOTH INTERPOLATION) ]] --
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+-- ==========================================
+-- SISI KANAN: PANEL WADAH KONTEN (CONTAINER)
+-- ==========================================
+local Container = Instance.new("Frame", MainFrame)
+Container.Size = UDim2.new(1, -140, 1, -60)
+Container.Position = UDim2.new(0, 130, 0, 50)
+Container.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
 
-local function MakeDraggable(frame)
-    local dragging = false
-    local dragInput, dragStart, startPos
+-- FOLDER HALAMAN (PAGE WADAH)
+local TabPages = {}
 
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
+local function CreatePage(name, textDisplay)
+    local Page = Instance.new("Frame", Container)
+    Page.Size = UDim2.new(1, 0, 1, 0)
+    Page.BackgroundTransparency = 1
+    Page.Visible = false
+    
+    local Label = Instance.new("TextLabel", Page)
+    Label.Size = UDim2.new(1, 0, 0, 40)
+    Label.Position = UDim2.new(0, 0, 0, 10)
+    Label.Text = textDisplay
+    Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 14
+    Label.BackgroundTransparency = 1
 
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
+    TabPages[name] = Page
+    return Page
+end
 
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
+-- RAKIT HALAMAN INTERNAL TAB
+local PageMain = CreatePage("Main", "TAB UTAMA FARM")
+local PageESP = CreatePage("ESP", "TAB ESP & COMBAT")
+local PageStats = CreatePage("Stats", "TAB AUTO STATS")
 
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            local targetPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            -- Tween agar pergeseran menu terlihat mulus di layar laptop
-            TweenService:Create(frame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = targetPos}):Play()
-        end
+-- Tambahan teks tutorial di halaman Main
+local TutorialText = Instance.new("TextLabel", PageMain)
+TutorialText.Size = UDim2.new(1, -20, 1, -50)
+TutorialText.Position = UDim2.new(0, 10, 0, 40)
+TutorialText.Text = "Struktur GUI Berhasil!\n\nSilakan klik tombol kategori di sebelah kiri untuk berpindah tab secara instan.\n\nTekan 'INSERT' di keyboard laptop untuk menyembunyikan menu."
+TutorialText.TextColor3 = Color3.fromRGB(150, 150, 150)
+TutorialText.Font = Enum.Font.Gotham
+TutorialText.TextSize = 12
+TutorialText.TextWrapped = true
+TutorialText.BackgroundTransparency = 1
+
+-- ==========================================
+-- LOGIKA TOMBOL DAN PERPINDAHAN TAB
+-- ==========================================
+local TabListLayout = Instance.new("UIListLayout", TabPanel)
+TabListLayout.Padding = UDim.new(0, 5)
+
+local function SwitchTab(tabName)
+    for name, page in pairs(TabPages) do
+        page.Visible = (name == tabName)
+    end
+end
+
+local function AddTabButton(name)
+    local Btn = Instance.new("TextButton", TabPanel)
+    Btn.Size = UDim2.new(1, 0, 0, 35)
+    Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Btn.Text = name:upper()
+    Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 12
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
+    
+    Btn.MouseButton1Click:Connect(function()
+        SwitchTab(name)
     end)
 end
 
--- Pasang fungsi Drag ke kedua frame utama
-MakeDraggable(KeyFrame)
-MakeDraggable(MainFrame)
+-- DAFTARKAN BUTTON PADA PANEL KIRI
+AddTabButton("Main")
+AddTabButton("ESP")
+AddTabButton("Stats")
 
--- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
+-- Tampilkan Tab Pertama secara Bawaan
+SwitchTab("Main")
+
+-- ==========================================
+-- [[ 3. LOGIKA UTAMA INTERAKSI ]] --
+-- ==========================================
+local UserInputService = game:GetService("UserInputService")
+
 local function UnlockMenu()
     KeyFrame.Visible = false
     MainFrame.Visible = true
 end
 
+-- Sembunyikan/Tampilkan Menu Utama menggunakan Tombol INSERT
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
