@@ -2,18 +2,17 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V7.5-SPEED_SLIDER",
+    Version = "V7.5-SPEED_FIX",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
     Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
     Show_FOV = false,
     FOV_Radius = 100, 
-    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP (0.05 - 1)
+    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP
     
-    -- Status Fitur Misc
-    Speed_Enabled = false,
-    WalkSpeed_Value = 16, -- Default kecepatan Roblox asli
+    -- Speed Hack Variable
+    WalkSpeed_Value = 16, -- Default speed Roblox
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -192,7 +191,7 @@ local FOVStroke = Instance.new("UIStroke", FOVToggle)
 FOVStroke.Color = Color3.fromRGB(50, 50, 50)
 FOVStroke.Thickness = 1.5
 
--- SLIDER PENGATUR BULATAN FOV
+-- SLIDER FOV (KOTAK MAIN)
 local SliderFrame = Instance.new("Frame", PageMain)
 SliderFrame.Size = UDim2.new(1, -20, 0, 50)
 SliderFrame.Position = UDim2.new(0, 10, 0, 115)
@@ -225,63 +224,40 @@ SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.Text = ""
 Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 
-local CustomText = Instance.new("TextLabel", PageMain)
-CustomText.Size = UDim2.new(1, -20, 0, 40)
-CustomText.Position = UDim2.new(0, 10, 0, 175)
-CustomText.Text = "Mobile & PC Adaptive Combat System\(\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent:\) Bullets redirect to target UpperTorso"
-CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
-CustomText.Font = Enum.Font.Gotham
-CustomText.TextSize = 10
-CustomText.BackgroundTransparency = 1
-
 -- ==========================================
--- ISI KONTEN TAB MISC: SPEED HACK SLIDER
+-- ISI KONTEN TAB MISC (SLIDER SPEED INSTALLED)
 -- ==========================================
-local SpeedToggle = Instance.new("TextButton", PageMisc)
-SpeedToggle.Size = UDim2.new(1, -20, 0, 45)
-SpeedToggle.Position = UDim2.new(0, 10, 0, 20)
-SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-SpeedToggle.Text = "SPEED HACK: OFF"
-SpeedToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedToggle.Font = Enum.Font.GothamBold
-SpeedToggle.TextSize = 13
-Instance.new("UICorner", SpeedToggle).CornerRadius = UDim.new(0, 6)
-local SpeedStroke = Instance.new("UIStroke", SpeedToggle)
-SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
-SpeedStroke.Thickness = 1.5
+local SpeedFrame = Instance.new("Frame", PageMisc)
+SpeedFrame.Size = UDim2.new(1, -20, 0, 50)
+SpeedFrame.Position = UDim2.new(0, 10, 0, 20)
+SpeedFrame.BackgroundTransparency = 1
 
--- SLIDER SPEED DI TAB MISC
-local SpeedSliderFrame = Instance.new("Frame", PageMisc)
-SpeedSliderFrame.Size = UDim2.new(1, -20, 0, 60)
-SpeedSliderFrame.Position = UDim2.new(0, 10, 0, 85)
-SpeedSliderFrame.BackgroundTransparency = 1
+local SpeedTitle = Instance.new("TextLabel", SpeedFrame)
+SpeedTitle.Size = UDim2.new(1, 0, 0, 20)
+SpeedTitle.Text = "WALKSPEED HACK: 16 (NORMAL)"
+SpeedTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedTitle.Font = Enum.Font.GothamBold
+SpeedTitle.TextSize = 11
+SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedTitle.BackgroundTransparency = 1
 
-local SpeedSliderTitle = Instance.new("TextLabel", SpeedSliderFrame)
-SpeedSliderTitle.Size = UDim2.new(1, 0, 0, 20)
-SpeedSliderTitle.Text = "WALKSPEED: 16"
-SpeedSliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedSliderTitle.Font = Enum.Font.GothamBold
-SpeedSliderTitle.TextSize = 11
-SpeedSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-SpeedSliderTitle.BackgroundTransparency = 1
+local SpeedBackground = Instance.new("Frame", SpeedFrame)
+SpeedBackground.Size = UDim2.new(1, 0, 0, 8)
+SpeedBackground.Position = UDim2.new(0, 0, 0, 25)
+SpeedBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", SpeedBackground).CornerRadius = UDim.new(1, 0)
 
-local SpeedSliderBg = Instance.new("Frame", SpeedSliderFrame)
-SpeedSliderBg.Size = UDim2.new(1, 0, 0, 8)
-SpeedSliderBg.Position = UDim2.new(0, 0, 0, 25)
-SpeedSliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", SpeedSliderBg).CornerRadius = UDim.new(1, 0)
+local SpeedBar = Instance.new("Frame", SpeedBackground)
+SpeedBar.Size = UDim2.new(0, 0, 1, 0) -- 0% default (Walkspeed 16)
+SpeedBar.BackgroundColor3 = Config.UI_Color
+Instance.new("UICorner", SpeedBar).CornerRadius = UDim.new(1, 0)
 
-local SpeedSliderBar = Instance.new("Frame", SpeedSliderBg)
-SpeedSliderBar.Size = UDim2.new(0, 0, 1, 0) -- 0% default
-SpeedSliderBar.BackgroundColor3 = Config.UI_Color
-Instance.new("UICorner", SpeedSliderBar).CornerRadius = UDim.new(1, 0)
-
-local SpeedSliderBtn = Instance.new("TextButton", SpeedSliderBg)
-SpeedSliderBtn.Size = UDim2.new(0, 16, 0, 16)
-SpeedSliderBtn.Position = UDim2.new(0, -8, 0.5, -8)
-SpeedSliderBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SpeedSliderBtn.Text = ""
-Instance.new("UICorner", SpeedSliderBtn).CornerRadius = UDim.new(1, 0)
+local SpeedButton = Instance.new("TextButton", SpeedBackground)
+SpeedButton.Size = UDim2.new(0, 16, 0, 16)
+SpeedButton.Position = UDim2.new(0, -8, 0.5, -8)
+SpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SpeedButton.Text = ""
+Instance.new("UICorner", SpeedButton).CornerRadius = UDim.new(1, 0)
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
@@ -366,7 +342,7 @@ mt.__index = newcclosure(function(self, index)
 end)
 setreadonly(mt, true)
 
--- Thread Pengendali Kamera Aimbot & Loop Speed Hack
+-- Thread Pengendali Kamera Aimbot & Loop Walkspeed
 RunService.RenderStepped:Connect(function()
     if Config.Show_FOV then
         FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -388,17 +364,17 @@ RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- LOOP SPEED HACK KONSISTEN (Mencegah karakter mental/reset)
-    if Config.Speed_Enabled then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChildOfClass("Humanoid") then
-            char:FindFirstChildOfClass("Humanoid").WalkSpeed = Config.WalkSpeed_Value
-        end
+    -- LOOP WALKSPEED PENGUNCI (Setiap Milidetik agar bypass reset Walkspeed)
+    local MyChar = LocalPlayer.Character
+    if MyChar and MyChar:FindFirstChild("Humanoid") then
+        MyChar.Humanoid.WalkSpeed = Config.WalkSpeed_Value
     end
 end)
 
--- LOGIKA SLIDER INTERAKTIF (TAB MAIN FOV)
-local function UpdateSlider()
+-- ==========================================
+-- LOGIKA SLIDER INTERAKTIF (MANUAL VARIABLE FIX)
+-- ==========================================
+local function UpdateFOVSlider()
     local percentage = math.clamp((UserInputService:GetMouseLocation().X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
     local rawValue = math.floor(30 + (percentage * 270))
     Config.FOV_Radius = rawValue
@@ -408,57 +384,37 @@ local function UpdateSlider()
     SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
 end
 
-local DraggingSlider = false
+local DraggingFOV = false
 SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSlider = true
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingFOV = true end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingFOV = false end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSlider()
-    end
+    if DraggingFOV and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateFOVSlider() end
 end)
 
--- ==========================================
--- LOGIKA SLIDER SPEED INTERAKTIF (TAB MISC)
--- ==========================================
+-- LOGIKA SLIDER SPEED HACK (VARS TERPISAH - ANTI CRASH)
 local function UpdateSpeedSlider()
-    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SpeedSliderBg.AbsolutePosition.X) / SpeedSliderBg.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(16 + (percentage * 184)) -- Min 16, Max 200
+    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SpeedBackground.AbsolutePosition.X) / SpeedBackground.AbsoluteSize.X, 0, 1)
+    local rawValue = math.floor(16 + (percentage * 134)) -- Skala Speed: 16 (Normal) sampai 150 (Dewa)
     Config.WalkSpeed_Value = rawValue
     
-    SpeedSliderTitle.Text = "WALKSPEED: " .. tostring(rawValue)
-    SpeedSliderBar.Size = UDim2.new(percentage, 0, 1, 0)
-    SpeedSliderBtn.Position = UDim2.new(percentage, -8, 0.5, -8)
-    
-    -- Terapkan instan jika karakter aktif berjalan
-    local char = LocalPlayer.Character
-    if Config.Speed_Enabled and char and char:FindFirstChildOfClass("Humanoid") then
-        char:FindFirstChildOfClass("Humanoid").WalkSpeed = rawValue
-    end
+    SpeedTitle.Text = "WALKSPEED HACK: " .. tostring(rawValue) .. (rawValue == 16 and " (NORMAL)" or " (FAST)")
+    SpeedBar.Size = UDim2.new(percentage, 0, 1, 0)
+    SpeedButton.Position = UDim2.new(percentage, -8, 0.5, -8)
 end
 
 local DraggingSpeed = false
-SpeedSliderBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSpeed = true
-    end
+SpeedButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSpeed = true end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSpeed = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSpeed = false end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSpeedSlider()
-    end
+    if DraggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSpeedSlider() end
 end)
 
 -- ==========================================
@@ -624,3 +580,36 @@ AimbotToggle.MouseButton1Click:Connect(function()
         AimStroke.Color = Color3.fromRGB(0, 255, 100)
     elseif Config.Aimbot_Type == "Auto-Lock" then
         Config.Aimbot_Type = "Silent Aim"
+        AimbotToggle.Text = "AIMBOT MODE: SILENT AIM (BODY)"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 40)
+        AimStroke.Color = Color3.fromRGB(200, 0, 255)
+    else
+        Config.Aimbot_Type = "Off"
+        AimbotToggle.Text = "AIMBOT MODE: OFF"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        AimStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Sakelar On/Off FOV Circle
+FOVToggle.MouseButton1Click:Connect(function()
+    Config.Show_FOV = not Config.Show_FOV
+    if Config.Show_FOV then
+        FOVToggle.Text = "SHOW FOV CIRCLE: ON"
+        FOVToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        FOVStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        FOVToggle.Text = "SHOW FOV CIRCLE: OFF"
+        FOVToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        FOVStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+CheckBtn.MouseButton1Click:Connect(function()
+    if KeyInput.Text == Config.CorrectKey then UnlockMenu() else KeyInput.Text = ""; KeyInput.PlaceholderText = "KUNCI SALAH!" end
+end)
+
+getgenv().setclip = setclipboard or toclipboard or (Clipboard and Clipboard.set)
+GetBtn.MouseButton1Click:Connect(function()
+    if getgenv().setclip then
+        getgenv().setclip(Config.
