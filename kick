@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V4.2-BOX_EMPTY",
+    Version = "V4.3-BOX_EMPTY",
     ESP_Enabled = false,
     
     -- Tema Utama UI (Merah Neon Yuta)
@@ -150,7 +150,7 @@ end
 
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
-local PageStats = CreatePage("Stats")
+local PageMisc = CreatePage("Misc") -- FIX: Diubah dari Stats menjadi Misc
 
 -- KONTEN TAB MAIN
 local MainText = Instance.new("TextLabel", PageMain)
@@ -163,12 +163,23 @@ MainText.TextSize = 13
 MainText.TextWrapped = true
 MainText.BackgroundTransparency = 1
 
--- SAKELAR DI DALAM TAB ESP
+-- KONTEN TAB MISC
+local MiscText = Instance.new("TextLabel", PageMisc)
+MiscText.Size = UDim2.new(1, -20, 1, -20)
+MiscText.Position = UDim2.new(0, 10, 0, 10)
+MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini akan menampung fitur tambahan seperti Teleport Island, Server Hop, atau Bring Mob nantinya."
+MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
+MiscText.Font = Enum.Font.Gotham
+MiscText.TextSize = 13
+MiscText.TextWrapped = true
+MiscText.BackgroundTransparency = 1
+
+-- SAKELAR DI DALAM TAB ESP (FIX: Nama tombol diubah jadi ESP murni & lebih kecil)
 local ESPToggle = Instance.new("TextButton", PageESP)
 ESPToggle.Size = UDim2.new(1, -20, 0, 45)
 ESPToggle.Position = UDim2.new(0, 10, 0, 20)
 ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-ESPToggle.Text = "WHITE PREMIUM ESP: OFF"
+ESPToggle.Text = "ESP: OFF"
 ESPToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 ESPToggle.Font = Enum.Font.GothamBold
 ESPToggle.TextSize = 13
@@ -198,14 +209,13 @@ end
 local function AddPremiumESP(Player)
     if Player == LocalPlayer then return end
 
-    -- FIX: Memaksa isi tengah kotak kosong (Filled = false)
-    local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Filled = false, Transprency = 1, Visible = false})
-    local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Filled = false, Transprency = 1, Visible = false})
+    local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Filled = false, Transparency = 1, Visible = false})
+    local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Filled = false, Transparency = 1, Visible = false})
     
     local HealthOutline = CreateDraw("Line", {Thickness = 4, Color = Color3.fromRGB(0,0,0), Visible = false})
     local HealthBar = CreateDraw("Line", {Thickness = 2, Visible = false})
     
-    local Info = CreateDraw("Text", {Size = 13, Center = true, Outline = true, Font = 2, Color = Settings.TextColor, Visible = false})
+    local Info = CreateDraw("Text", {Size = 11, Center = true, Outline = true, Font = 3, Color = Settings.TextColor, Visible = false})
 
     local RenderConn
     RenderConn = RunService.RenderStepped:Connect(function()
@@ -221,7 +231,7 @@ local function AddPremiumESP(Player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                -- 1. BOX BENING TRANSPARAN (Hanya garis tepi putih)
+                -- 1. BOX BENING
                 BoxOutline.Size = BoxSize
                 BoxOutline.Position = BoxPos
                 BoxOutline.Visible = true
@@ -230,7 +240,7 @@ local function AddPremiumESP(Player)
                 Box.Position = BoxPos
                 Box.Visible = true
 
-                -- 2. HEALTH BAR MURNI PUTIH DI SAMPING KOTAK
+                -- 2. HEALTH BAR PUTIH
                 if Settings.HealthBar then
                     local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
                     local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
@@ -241,15 +251,15 @@ local function AddPremiumESP(Player)
 
                     HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
                     HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
-                    HealthBar.Color = Settings.BoxColor -- Ikut Putih Bersih
+                    HealthBar.Color = Settings.BoxColor
                     HealthBar.Visible = true
                 end
 
-                -- 3. TEKS INFO NAMA + JARAK METER (Di Atas Kepala Target)
+                -- 3. TEKS "ESP" HALUS MINI
                 if Settings.Distance then
-                    local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
-                    Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
-                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
+                    local Dist = math.floor((Root.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
+                    Info.Text = "ESP | " .. Dist .. "m"
+                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 14)
                     Info.Visible = true
                 end
             else
@@ -289,7 +299,7 @@ end
 
 AddTabButton("Main")
 AddTabButton("ESP")
-AddTabButton("Stats")
+AddTabButton("Misc") -- FIX: Tombol tab diganti dari Stats menjadi Misc
 SwitchTab("Main")
 
 -- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
@@ -316,11 +326,11 @@ end)
 ESPToggle.MouseButton1Click:Connect(function()
     Config.ESP_Enabled = not Config.ESP_Enabled
     if Config.ESP_Enabled then
-        ESPToggle.Text = "WHITE PREMIUM ESP: ON"
+        ESPToggle.Text = "ESP: ON"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         ESPStroke.Color = Color3.fromRGB(0, 255, 100)
     else
-        ESPToggle.Text = "WHITE PREMIUM ESP: OFF"
+        ESPToggle.Text = "ESP: OFF"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         ESPStroke.Color = Color3.fromRGB(50, 50, 50)
     end
@@ -330,10 +340,10 @@ CheckBtn.MouseButton1Click:Connect(function()
     if KeyInput.Text == Config.CorrectKey then UnlockMenu() else KeyInput.Text = ""; KeyInput.PlaceholderText = "KUNCI SALAH!" end
 end)
 
+getgenv().setclip = setclipboard or toclipboard or (Clipboard and Clipboard.set)
 GetBtn.MouseButton1Click:Connect(function()
-    local setclip = setclipboard or toclipboard or (Clipboard and Clipboard.set)
-    if setclip then
-        setclip(Config.KeyURL)
+    if getgenv().setclip then
+        getgenv().setclip(Config.KeyURL)
         GetBtn.Text = "LINK COPIED!"
         task.wait(1.5)
         GetBtn.Text = "GET KEY"
