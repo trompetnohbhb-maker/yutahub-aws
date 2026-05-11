@@ -351,19 +351,18 @@ end)
 -- ==========================================
 -- TAMBAHAN FITUR: FLY HACK PREMIUM ENGINE
 -- ==========================================
+
 local FlyConfig = {
     Enabled = false,
     Value = 50 -- Kecepatan terbang awal
 }
 
-local FlyingConn = nil
-local BodyVelocity = nil
-local BodyGyro = nil
+local FlyConnection = nil
 
--- 1. TOMBOL TOGGLE FLY (ON/OFF)
+-- [UI] TOMBOL TOGGLE FLY (ON/OFF)
 local FlyToggle = Instance.new("TextButton", PageMisc)
 FlyToggle.Size = UDim2.new(1, -20, 0, 38)
-FlyToggle.Position = UDim2.new(0, 10, 0, 130) -- Posisi di bawah Slider Speed
+FlyToggle.Position = UDim2.new(0, 10, 0, 130)
 FlyToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 FlyToggle.Text = "FLY HACK: OFF"
 FlyToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
@@ -374,7 +373,7 @@ local FlyStroke = Instance.new("UIStroke", FlyToggle)
 FlyStroke.Color = Color3.fromRGB(50, 50, 50)
 FlyStroke.Thickness = 1.5
 
--- 2. WADAH SLIDER FLY SPEED
+-- [UI] CANVAS SLIDER SPEED TERBANG
 local F_SliderFrame = Instance.new("Frame", PageMisc)
 F_SliderFrame.Size = UDim2.new(1, -20, 0, 50)
 F_SliderFrame.Position = UDim2.new(0, 10, 0, 180)
@@ -396,7 +395,7 @@ F_SliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Instance.new("UICorner", F_SliderBackground).CornerRadius = UDim.new(1, 0)
 
 local F_SliderBar = Instance.new("Frame", F_SliderBackground)
-F_SliderBar.Size = UDim2.new(0.25, 0, 1, 0) -- Default posisi 50
+F_SliderBar.Size = UDim2.new(0.25, 0, 1, 0)
 F_SliderBar.BackgroundColor3 = Config.UI_Color
 Instance.new("UICorner", F_SliderBar).CornerRadius = UDim.new(1, 0)
 
@@ -408,78 +407,57 @@ F_SliderButton.Text = ""
 Instance.new("UICorner", F_SliderButton).CornerRadius = UDim.new(1, 0)
 
 -- ==========================================
--- LOGIKA AKSI TERBANG (FLY CORE LOGIC)
+-- LOGIKA ENGINE BYPASS FLY
 -- ==========================================
-
-local function CleanFly()
-    if FlyingConn then FlyingConn:Disconnect() FlyingConn = nil end
-    if BodyVelocity then BodyVelocity:Destroy() BodyVelocity = nil end
-    if BodyGyro then BodyGyro:Destroy() BodyGyro = nil end
-end
-
-local function StartFly()
-    CleanFly()
+local function StartBypassFly()
+    if FlyConnection then FlyConnection:Disconnect() end
     
-    local Character = LocalPlayer.Character
-    local RootPart = Character and Character:FindFirstChild("HumanoidRootPart")
-    if not RootPart then return end
-    
-    -- Struktur instansi gaya untuk menahan gravitasi roblox
-    BodyVelocity = Instance.new("BodyVelocity")
-    BodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    BodyVelocity.Velocity = Vector3.new(0, 0, 0)
-    BodyVelocity.Parent = RootPart
-    
-    BodyGyro = Instance.new("BodyGyro")
-    BodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    BodyGyro.CFrame = Camera.CFrame
-    BodyGyro.Parent = RootPart
-    
-    -- Thread render konstan agar navigasi arah mengikuti pandangan kamera (PC & HP Mobile)
-    FlyingConn = RunService.RenderStepped:Connect(function()
-        if not FlyConfig.Enabled or not RootPart.Parent or not Character:FindFirstChild("Humanoid") then
-            CleanFly()
-            return
+    FlyConnection = RunService.Heartbeat:Connect(function(deltaTime)
+        if not FlyConfig.Enabled then 
+            if FlyConnection then FlyConnection:Disconnect() FlyConnection = nil end
+            return 
         end
         
-        BodyGyro.CFrame = Camera.CFrame
-        local MoveDirection = Character:FindFirstChild("Humanoid").MoveDirection
+        local Char = LocalPlayer.Character
+        local Root = Char and Char:FindFirstChild("HumanoidRootPart")
+        local Hum = Char and Char:FindFirstChildOfClass("Humanoid")
         
-        -- Kalkulasi kecepatan terbang berdasarkan input joystick/WASD + arah kamera
-        if MoveDirection.Magnitude > 0 then
-            BodyVelocity.Velocity = Camera.CFrame:VectorToWorldSpace(Vector3.new(MoveDirection.X, 0, -MoveDirection.Z).Unit) * FlyConfig.Value
-        else
-            BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+        if Root and Hum then
+            -- Mengunci sudut pandang badan lurus ke depan mengikuti arah kamera
+            Root.CFrame = CFrame.lookAt(Root.Position, Root.Position + Vector3.new(Camera.CFrame.LookVector.X, 0, Camera.CFrame.LookVector.Z))
+            
+            local MoveDirection = Hum.MoveDirection
+            if MoveDirection.Magnitude > 0 then
+                -- Menggeser posisi koordinat CFrame tanpa instansi BodyVelocity
+                local FlyVector = Camera.CFrame:VectorToWorldSpace(Vector3.new(MoveDirection.X, 0, -MoveDirection.Z).Unit)
+                Root.CFrame = Root.CFrame + (FlyVector * FlyConfig.Value * deltaTime)
+            else
+                -- Mematikan efek jatuh bebas (kecepatan jatuh) akibat gravitasi engine
+                Root.Velocity = Vector3.new(0, 0, 0)
+            end
         end
     end)
 end
 
--- Fungsi Sakelar Fly Toggle
+-- Hubungkan fungsi klik sakelar
 FlyToggle.MouseButton1Click:Connect(function()
     FlyConfig.Enabled = not FlyConfig.Enabled
     if FlyConfig.Enabled then
         FlyToggle.Text = "FLY HACK: ON"
         FlyToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         FlyStroke.Color = Color3.fromRGB(0, 255, 100)
-        StartFly()
+        StartBypassFly()
     else
         FlyToggle.Text = "FLY HACK: OFF"
         FlyToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         FlyStroke.Color = Color3.fromRGB(50, 50, 50)
-        CleanFly()
     end
 end)
 
--- Sinkronisasi ulang jika karakter hidup kembali setelah mati
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(1)
-    if FlyConfig.Enabled then StartFly() end
-end)
-
--- Fungsi Geser Batang Slider Fly Speed
+-- Hubungkan fungsi geser slider
 local function UpdateFlySlider()
     local percentage = math.clamp((UserInputService:GetMouseLocation().X - F_SliderBackground.AbsolutePosition.X) / F_SliderBackground.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(10 + (percentage * 190)) -- Rentang kecepatan terbang: 10 - 200
+    local rawValue = math.floor(10 + (percentage * 190)) -- Jangkauan nilai 10 - 200
     FlyConfig.Value = rawValue
     
     F_SliderTitle.Text = "FLY SPEED SIZE: " .. tostring(rawValue)
@@ -489,20 +467,21 @@ end
 
 local F_Dragging = false
 F_SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        F_Dragging = true
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+        F_Dragging = true 
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        F_Dragging = false
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then 
+        F_Dragging = false 
     end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if F_Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateFlySlider()
+    if F_Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then 
+        UpdateFlySlider() 
     end
 end)
+
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
