@@ -2,17 +2,14 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V7.5-SPEED_FIX",
+    Version = "V7.0-MOBILE_PC",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
     Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
     Show_FOV = false,
     FOV_Radius = 100, 
-    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP
-    
-    -- Speed Hack Variable
-    WalkSpeed_Value = 16, -- Default speed Roblox
+    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP (0.05 - 1)
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -191,7 +188,7 @@ local FOVStroke = Instance.new("UIStroke", FOVToggle)
 FOVStroke.Color = Color3.fromRGB(50, 50, 50)
 FOVStroke.Thickness = 1.5
 
--- SLIDER FOV (KOTAK MAIN)
+-- SLIDER PENGATUR BULATAN FOV
 local SliderFrame = Instance.new("Frame", PageMain)
 SliderFrame.Size = UDim2.new(1, -20, 0, 50)
 SliderFrame.Position = UDim2.new(0, 10, 0, 115)
@@ -224,40 +221,25 @@ SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.Text = ""
 Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 
--- ==========================================
--- ISI KONTEN TAB MISC (SLIDER SPEED INSTALLED)
--- ==========================================
-local SpeedFrame = Instance.new("Frame", PageMisc)
-SpeedFrame.Size = UDim2.new(1, -20, 0, 50)
-SpeedFrame.Position = UDim2.new(0, 10, 0, 20)
-SpeedFrame.BackgroundTransparency = 1
+local CustomText = Instance.new("TextLabel", PageMain)
+CustomText.Size = UDim2.new(1, -20, 0, 40)
+CustomText.Position = UDim2.new(0, 10, 0, 175)
+CustomText.Text = "Mobile & PC Adaptive Combat System\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent: Bullets redirect to target UpperTorso"
+CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
+CustomText.Font = Enum.Font.Gotham
+CustomText.TextSize = 10
+CustomText.BackgroundTransparency = 1
 
-local SpeedTitle = Instance.new("TextLabel", SpeedFrame)
-SpeedTitle.Size = UDim2.new(1, 0, 0, 20)
-SpeedTitle.Text = "WALKSPEED HACK: 16 (NORMAL)"
-SpeedTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedTitle.Font = Enum.Font.GothamBold
-SpeedTitle.TextSize = 11
-SpeedTitle.TextXAlignment = Enum.TextXAlignment.Left
-SpeedTitle.BackgroundTransparency = 1
-
-local SpeedBackground = Instance.new("Frame", SpeedFrame)
-SpeedBackground.Size = UDim2.new(1, 0, 0, 8)
-SpeedBackground.Position = UDim2.new(0, 0, 0, 25)
-SpeedBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", SpeedBackground).CornerRadius = UDim.new(1, 0)
-
-local SpeedBar = Instance.new("Frame", SpeedBackground)
-SpeedBar.Size = UDim2.new(0, 0, 1, 0) -- 0% default (Walkspeed 16)
-SpeedBar.BackgroundColor3 = Config.UI_Color
-Instance.new("UICorner", SpeedBar).CornerRadius = UDim.new(1, 0)
-
-local SpeedButton = Instance.new("TextButton", SpeedBackground)
-SpeedButton.Size = UDim2.new(0, 16, 0, 16)
-SpeedButton.Position = UDim2.new(0, -8, 0.5, -8)
-SpeedButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SpeedButton.Text = ""
-Instance.new("UICorner", SpeedButton).CornerRadius = UDim.new(1, 0)
+-- ISI KONTEN TAB MISC
+local MiscText = Instance.new("TextLabel", PageMisc)
+MiscText.Size = UDim2.new(1, -20, 1, -20)
+MiscText.Position = UDim2.new(0, 10, 0, 10)
+MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini siap diisi dengan fitur tambahan seperti Teleport, Fly, Speed, atau fitur-fitur server lainnya."
+MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
+MiscText.Font = Enum.Font.Gotham
+MiscText.TextSize = 13
+MiscText.TextWrapped = true
+MiscText.BackgroundTransparency = 1
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
@@ -303,10 +285,12 @@ local function GetClosestPlayer()
     return target
 end
 
+-- DETEKSI CROSS-PLATFORM: PC (Klik Kiri) & HP Mobile (Touch Layar)
 local Attacking = false
 
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
+    -- Deteksi PC Klik Kiri ATAU HP Mobile Layar disentuh
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = true
     end
@@ -318,7 +302,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- HOOK LOGIC SILENT AIM
+-- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -342,7 +326,7 @@ mt.__index = newcclosure(function(self, index)
 end)
 setreadonly(mt, true)
 
--- Thread Pengendali Kamera Aimbot & Loop Walkspeed
+-- Thread Pengendali Kamera Aimbot
 RunService.RenderStepped:Connect(function()
     if Config.Show_FOV then
         FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -352,6 +336,7 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
 
+    -- LOCK KEPALA: Aktif saat Klik Kiri (PC) atau Jempol sedang menembak di layar (HP)
     if Config.Aimbot_Type == "Auto-Lock" and Attacking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
@@ -360,21 +345,14 @@ RunService.RenderStepped:Connect(function()
             local aimDirection = (targetHead - camPos).Unit
             local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
             
+            -- Gerakan mulus agar tidak guncang keras di HP Redmi
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
         end
     end
-    
-    -- LOOP WALKSPEED PENGUNCI (Setiap Milidetik agar bypass reset Walkspeed)
-    local MyChar = LocalPlayer.Character
-    if MyChar and MyChar:FindFirstChild("Humanoid") then
-        MyChar.Humanoid.WalkSpeed = Config.WalkSpeed_Value
-    end
 end)
 
--- ==========================================
--- LOGIKA SLIDER INTERAKTIF (MANUAL VARIABLE FIX)
--- ==========================================
-local function UpdateFOVSlider()
+-- LOGIKA SLIDER INTERAKTIF
+local function UpdateSlider()
     local percentage = math.clamp((UserInputService:GetMouseLocation().X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
     local rawValue = math.floor(30 + (percentage * 270))
     Config.FOV_Radius = rawValue
@@ -384,41 +362,25 @@ local function UpdateFOVSlider()
     SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
 end
 
-local DraggingFOV = false
+local DraggingSlider = false
 SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingFOV = true end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = true
+    end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingFOV = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = false
+    end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingFOV and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateFOVSlider() end
-end)
-
--- LOGIKA SLIDER SPEED HACK (VARS TERPISAH - ANTI CRASH)
-local function UpdateSpeedSlider()
-    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SpeedBackground.AbsolutePosition.X) / SpeedBackground.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(16 + (percentage * 134)) -- Skala Speed: 16 (Normal) sampai 150 (Dewa)
-    Config.WalkSpeed_Value = rawValue
-    
-    SpeedTitle.Text = "WALKSPEED HACK: " .. tostring(rawValue) .. (rawValue == 16 and " (NORMAL)" or " (FAST)")
-    SpeedBar.Size = UDim2.new(percentage, 0, 1, 0)
-    SpeedButton.Position = UDim2.new(percentage, -8, 0.5, -8)
-end
-
-local DraggingSpeed = false
-SpeedButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSpeed = true end
-end)
-UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSpeed = false end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if DraggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSpeedSlider() end
+    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider()
+    end
 end)
 
 -- ==========================================
--- [[ 4. INDEPENDENT PRO ESP ENGINE ]] --
+-- [[ 4. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -552,6 +514,7 @@ ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFram
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
+    -- Tombol insert tetap dideteksi (untuk PC)
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
         MainFrame.Visible = not MainFrame.Visible
     end
@@ -612,4 +575,11 @@ end)
 getgenv().setclip = setclipboard or toclipboard or (Clipboard and Clipboard.set)
 GetBtn.MouseButton1Click:Connect(function()
     if getgenv().setclip then
-        getgenv().setclip(Config.
+        getgenv().setclip(Config.KeyURL)
+        GetBtn.Text = "LINK COPIED!"
+        task.wait(1.5)
+        GetBtn.Text = "GET KEY"
+    else
+        GetBtn.Text = "Salin: " .. Config.KeyURL
+    end
+end)
