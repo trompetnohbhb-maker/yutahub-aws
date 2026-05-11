@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V1.7-MOBILE_PC",
+    Version = "V1.71-MOBILE_PC",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
