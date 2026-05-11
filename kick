@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V6.0-COMBAT_OP",
+    Version = "V6.5-COMBAT_FIX",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
@@ -224,7 +224,7 @@ Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 local CustomText = Instance.new("TextLabel", PageMain)
 CustomText.Size = UDim2.new(1, -20, 0, 40)
 CustomText.Position = UDim2.new(0, 10, 0, 175)
-CustomText.Text = "Aimbot 1: Auto Lock On Left-Click\nAimbot 2: Silent Aim (Direct Target)"
+CustomText.Text = "Lock Mode: Auto Headshot on Left-Click\nSilent Mode: Direct Bullet redirection to Enemy Body"
 CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
 CustomText.Font = Enum.Font.Gotham
 CustomText.TextSize = 11
@@ -299,26 +299,28 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Tipe 2)
+-- HOOK LOGIC SILENT AIM (Tipe 2: Mengalihkan Target Klik ke Tubuh Musuh/UpperTorso)
+local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
-local oldNamecall = mt.__namecall
+local oldIndex = mt.__index
 setreadonly(mt, false)
 
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-    
-    if Config.Aimbot_Type == "Silent Aim" and method == "FindPartOnRayWithIgnoreList" then
-        local target = GetClosestPlayer()
-        if target and target.Character and target.Character:FindFirstChild("Head") then
-            -- Membelokkan jalur peluru langsung ke kepala target
-            local origin = Camera.CFrame.Position
-            local direction = (target.Character.Head.Position - origin).Unit * 1000
-            args[1] = Ray.new(origin, direction)
-            return oldNamecall(self, unpack(args))
+mt.__index = newcclosure(function(self, index)
+    if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
+        if self == Mouse and (index == "Hit" or index == "Target") then
+            local target = GetClosestPlayer()
+            -- Menyerang bagian tubuh utama (HumanoidRootPart / UpperTorso)
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local targetBody = target.Character.HumanoidRootPart
+                if index == "Hit" then
+                    return targetBody.CFrame
+                elseif index == "Target" then
+                    return targetBody
+                end
+            end
         end
     end
-    return oldNamecall(self, ...)
+    return oldIndex(self, index)
 end)
 setreadonly(mt, true)
 
@@ -332,7 +334,7 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
 
-    -- AIMBOT TIPE 1: Kunci Kamera Pada Klik Kiri
+    -- AIMBOT TIPE 1: Kunci Kamera Pada Klik Kiri ke Kepala Target
     if Config.Aimbot_Type == "Auto-Lock" and LeftClicking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
@@ -374,9 +376,15 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ==========================================
--- [[ 4. INDEPENDENT PRO ESP ENGINE ]] --
+-- [[ 4. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
 -- ==========================================
 local ActiveESP = {}
+
+local function CreateDraw(obj, props)
+    local draw = Drawing.new(obj)
+    for i, v in pairs(props) do draw[i] = v end
+    return draw
+end
 
 local function ClearESP(player)
     if ActiveESP[player] then
@@ -388,6 +396,7 @@ end
 local function AddPremiumESP(Player)
     if Player == LocalPlayer then return end
 
+    -- Pembuatan objek awal (Disembunyikan dlu sebelum divalidasi)
     local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Filled = false, Transparency = 1, Visible = false})
     local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Filled = false, Transparency = 1, Visible = false})
     
@@ -396,47 +405,58 @@ local function AddPremiumESP(Player)
     
     local Info = CreateDraw("Text", {Size = 11, Center = true, Outline = true, Font = 3, Color = Settings.TextColor, Visible = false})
 
+    ActiveESP[Player] = {BoxOutline, Box, HealthOutline, HealthBar, Info}
+
     local RenderConn
     RenderConn = RunService.RenderStepped:Connect(function()
-        local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        
-        if Config.ESP_Enabled and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") and MyRoot then
+        -- PERBAIKAN BUG: Validasi ekstra agar script tidak crash jika karakter belum termuat sempurna
+        if Config.ESP_Enabled and Player and Player.Parent and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local Hum = Player.Character:FindFirstChildOfClass("Humanoid")
             local Root = Player.Character.HumanoidRootPart
-            local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
+            local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            
+            if Hum and Root and MyRoot and Hum.Health > 0 then
+                local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
 
-            if OnScreen and Hum and Hum.Health > 0 then
-                local Size = 2000 / Pos.Z
-                local BoxSize = Vector2.new(Size, Size * 1.5)
-                local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
+                if OnScreen then
+                    local Size = 2000 / Pos.Z
+                    local BoxSize = Vector2.new(Size, Size * 1.5)
+                    local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                BoxOutline.Size = BoxSize
-                BoxOutline.Position = BoxPos
-                BoxOutline.Visible = true
+                    -- 1. BOX BENING
+                    BoxOutline.Size = BoxSize
+                    BoxOutline.Position = BoxPos
+                    BoxOutline.Visible = true
 
-                Box.Size = BoxSize
-                Box.Position = BoxPos
-                Box.Visible = true
+                    Box.Size = BoxSize
+                    Box.Position = BoxPos
+                    Box.Visible = true
 
-                if Settings.HealthBar then
-                    local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
-                    local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
-                    
-                    HealthOutline.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
-                    HealthOutline.To = Vector2.new(BoxPos.X - 6, BoxPos.Y)
-                    HealthOutline.Visible = true
+                    -- 2. HEALTH BAR PUTIH
+                    if Settings.HealthBar then
+                        local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
+                        local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
+                        
+                        HealthOutline.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                        HealthOutline.To = Vector2.new(BoxPos.X - 6, BoxPos.Y)
+                        HealthOutline.Visible = true
 
-                    HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
-                    HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
-                    HealthBar.Color = Settings.BoxColor
-                    HealthBar.Visible = true
-                end
+                        HealthBar.From = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y)
+                        HealthBar.To = Vector2.new(BoxPos.X - 6, BoxPos.Y + BoxSize.Y - HealthOffset)
+                        HealthBar.Color = Settings.BoxColor
+                        HealthBar.Visible = true
+                    end
 
-                if Settings.Distance then
-                    local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
-                    Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
-                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
-                    Info.Visible = true
+                    -- 3. TEKS NAMA & JARAK
+                    if Settings.Distance then
+                        local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
+                        Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
+                        Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
+                        Info.Visible = true
+                    end
+                else
+                    BoxOutline.Visible = false; Box.Visible = false
+                    HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
                 end
             else
                 BoxOutline.Visible = false; Box.Visible = false
@@ -520,8 +540,8 @@ AimbotToggle.MouseButton1Click:Connect(function()
         AimStroke.Color = Color3.fromRGB(0, 255, 100)
     elseif Config.Aimbot_Type == "Auto-Lock" then
         Config.Aimbot_Type = "Silent Aim"
-        AimbotToggle.Text = "AIMBOT MODE: SILENT AIM"
-        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 40) -- Warna ungu premium
+        AimbotToggle.Text = "AIMBOT MODE: SILENT AIM (BODY)"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 40)
         AimStroke.Color = Color3.fromRGB(200, 0, 255)
     else
         Config.Aimbot_Type = "Off"
