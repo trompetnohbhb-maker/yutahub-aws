@@ -724,8 +724,8 @@ local function AddPremiumESP(Player)
             local Root = Player.Character.HumanoidRootPart
             local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             
-            if Hum and Root and MyRoot and Hum.Health > 0 then
-                local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
+           if Hum and Root and MyRoot and Hum.Health > 0 and (Player.TeamColor ~= LocalPlayer.TeamColor or Player.Team == nil) then
+
 
                 if OnScreen then
                     local Size = 2000 / Pos.Z
