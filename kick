@@ -569,65 +569,58 @@ end)
 -- [[ CORE BYPASS SILENT AIM UNIVERSAL  ]] --
 -- [[ HOOK SILENT AIM: MOUSE INDEX & RAYCAST + WALLBANG ]] --
 -- ==========================================
-local Mouse = LocalPlayer:GetMouse()
-
--- Hook 1: Menggantikan fungsi mt.__index (Untuk Game Klasik - TETAP SAMA)
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
+local oldNamecall = mt.__namecall
 setreadonly(mt, false)
 
+-- 1. HOOK UNTUK GAME BERBASIS MOUSE (Game Klasik)
 mt.__index = newcclosure(function(self, index)
     if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
         if self == Mouse and (index == "Hit" or index == "Target") then
             local target = GetClosestPlayer()
-            if target and target.Character then
-                local targetBody = target.Character:FindFirstChild("UpperTorso") or target.Character:FindFirstChild("HumanoidRootPart")
-                if targetBody then
-                    if index == "Hit" then
-                        return targetBody.CFrame
-                    elseif index == "Target" then
-                        return targetBody
-                    end
+            if target and target.Character and target.Character:FindFirstChild("UpperTorso") then
+                local targetBody = target.Character.UpperTorso
+                if index == "Hit" then
+                    return targetBody.CFrame
+                elseif index == "Target" then
+                    return targetBody
+                end
+            elseif target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                -- Backup jika game tidak memiliki struktur part UpperTorso
+                local targetBody = target.Character.HumanoidRootPart
+                if index == "Hit" then
+                    return targetBody.CFrame
+                elseif index == "Target" then
+                    return targetBody
                 end
             end
         end
     end
     return oldIndex(self, index)
 end)
-setreadonly(mt, true)
 
--- Hook 2: Manipulasi Namecall Raycast (SUDAH DIUPDATE DENGAN WALLBANG BYPASS)
-local mt2 = getrawmetatable(game)
-local oldNamecall = mt2.__namecall
-setreadonly(mt2, false)
-
-mt2.__namecall = newcclosure(function(self, ...)
+-- 2. HOOK UNTUK GAME BERBASIS RAYCAST ENGINE (Game Modern seperti Arsenal, Bedwars, dll)
+mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
     local args = {...}
     
     if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
-        -- 1. DETEKSI ENGINE RAYCAST TERBARU
-        if method == "Raycast" and args and args then
+        -- Deteksi jika skrip game memanggil fungsi kalkulasi arah tembakan peluru
+        if method == "Raycast" or method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
             local target = GetClosestPlayer()
             if target and target.Character then
                 local targetBody = target.Character:FindFirstChild("UpperTorso") or target.Character:FindFirstChild("HumanoidRootPart")
                 if targetBody then
-                    -- BYPASS WALLBANG: Geser asal peluru (Origin) langsung ke area kosong dekat tubuh musuh
-                    local fakeOrigin = targetBody.Position + Vector3.new(0, 2, 0)
-                    args = fakeOrigin
-                    args = (targetBody.Position - fakeOrigin).Unit * 1000
-                end
-            end
-            
-        -- 2. DETEKSI ENGINE RAYCAST KLASIK
-        elseif (method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist") and args then
-            local target = GetClosestPlayer()
-            if target and target.Character then
-                local targetBody = target.Character:FindFirstChild("UpperTorso") or target.Character:FindFirstChild("HumanoidRootPart")
-                if targetBody then
-                    -- Manipulasi structural Ray instansi agar Origin menempel langsung ke target musuh
-                    local fakeOrigin = targetBody.Position + Vector3.new(0, 2, 0)
-                    args = Ray.new(fakeOrigin, (targetBody.Position - fakeOrigin).Unit * 1000)
+                    -- Belokkan arah asal vektor asal peluru ke koordinat tubuh target musuh secara instan
+                    if method == "Raycast" then
+                        -- args[1] adalah Origin, args[2] adalah Direction (Arah)
+                        args[2] = (targetBody.Position - args[1]).Unit * 1000
+                    elseif method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
+                        -- args[1] adalah Ray structural instansi
+                        local origin = args[1].Origin
+                        args[1] = Ray.new(origin, (targetBody.Position - origin).Unit * 1000)
+                    end
                 end
             end
         end
@@ -636,37 +629,8 @@ mt2.__namecall = newcclosure(function(self, ...)
     setnamecallmethod(method)
     return oldNamecall(self, unpack(args))
 end)
-setreadonly(mt2, true)
 
--- ==========================================
--- [[ BYPASS REMOTE EVENT ANTI-CHEAT (ARSENAL) ]] --
--- ==========================================
-local OldNamecall
-OldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local Method = getnamecallmethod()
-    local Args = {...}
-    
-    if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
-        if Method == "FireServer" and (self.Name == "HitPart" or self.Name == "Fire" or self.Name == "Bullet" or self.Name == "Shoot") then
-            local Target = GetClosestPlayer()
-            if Target and Target.Character then
-                local TargetBody = Target.Character:FindFirstChild("UpperTorso") or Target.Character:FindFirstChild("HumanoidRootPart")
-                if TargetBody then
-                    for i, v in pairs(Args) do
-                        if typeof(v) == "Vector3" then
-                            Args[i] = TargetBody.Position
-                        elseif typeof(v) == "CFrame" then
-                            Args[i] = TargetBody.CFrame
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    return OldNamecall(self, unpack(Args))
-end))
-
+setreadonly(mt, true)
 
 -- Thread Pengendali Kamera Aimbot
 RunService.RenderStepped:Connect(function()
