@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTAHUB",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V1.71-MOBILE_PC",
+    Version = "V1.73-MOBILE_PC",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
@@ -10,6 +10,8 @@ local Config = {
     Show_FOV = false,
     FOV_Radius = 100, 
     Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP (0.05 - 1)
+    Hitbox_Enabled = false,
+    Hitbox_Size = 15,
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -145,17 +147,22 @@ Container.Position = UDim2.new(0, 130, 0, 50)
 Container.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
 
--- FOLDER HALAMAN (PAGE WADAH)
+-- FOLDER HALAMAN (PAGE WADAH SEKARANG BISA DI-SCROLL)
 local TabPages = {}
 local function CreatePage(name)
-    local Page = Instance.new("Frame", Container)
+    local Page = Instance.new("ScrollingFrame", Container)
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.Visible = false
+    
+    -- Pengaturan Batang Scroll Otomatis (Merah Neon Yuta)
+    Page.ScrollBarThickness = 3
+    Page.ScrollBarImageColor3 = Config.UI_Color
+    Page.CanvasSize = UDim2.new(0, 0, 0, 360) -- Mengatur batas panjang gulir ke bawah
+    
     TabPages[name] = Page
     return Page
 end
-
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
 local PageMisc = CreatePage("Misc")
@@ -189,7 +196,7 @@ local FOVStroke = Instance.new("UIStroke", FOVToggle)
 FOVStroke.Color = Color3.fromRGB(50, 50, 50)
 FOVStroke.Thickness = 1.5
 
--- SLIDER PENGATUR BULATAN FOV
+-- [1] SLIDER PENGATUR BULATAN FOV
 local SliderFrame = Instance.new("Frame", PageMain)
 SliderFrame.Size = UDim2.new(1, -20, 0, 50)
 SliderFrame.Position = UDim2.new(0, 10, 0, 115)
@@ -197,7 +204,7 @@ SliderFrame.BackgroundTransparency = 1
 
 local SliderTitle = Instance.new("TextLabel", SliderFrame)
 SliderTitle.Size = UDim2.new(1, 0, 0, 20)
-SliderTitle.Text = "FOV SIZE: 100"
+SliderTitle.Text = "FOV SIZE: " .. tostring(Config.FOV_Radius)
 SliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
 SliderTitle.Font = Enum.Font.GothamBold
 SliderTitle.TextSize = 11
@@ -222,14 +229,166 @@ SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.Text = ""
 Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 
+-- Mekanika Seret Slider FOV (Mobile & PC)
+local function AktifkanSliderFOV()
+    local Draggable = false
+    SliderButton.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Draggable = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Draggable = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if Draggable and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local RentangX = math.clamp((input.Position.X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
+            SliderBar.Size = UDim2.new(RentangX, 0, 1, 0)
+            SliderButton.Position = UDim2.new(RentangX, -8, 0.5, -8)
+            
+            local NilaiBaru = math.round(10 + (RentangX * 390)) -- Jangkauan FOV: 10 - 400
+            Config.FOV_Radius = NilaiBaru
+            SliderTitle.Text = "FOV SIZE: " .. tostring(NilaiBaru)
+        end
+    end)
+end
+AktifkanSliderFOV()
+
+-- [2] TOMBOL UTAMA HITBOX EXPANDER
+local HitboxToggle = Instance.new("TextButton", PageMain)
+HitboxToggle.Size = UDim2.new(1, -20, 0, 38)
+HitboxToggle.Position = UDim2.new(0, 10, 0, 175)
+HitboxToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+HitboxToggle.Text = "HITBOX EXPANDER: OFF"
+HitboxToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+HitboxToggle.Font = Enum.Font.GothamBold
+HitboxToggle.TextSize = 12
+Instance.new("UICorner", HitboxToggle).CornerRadius = UDim.new(0, 6)
+local HitboxStroke = Instance.new("UIStroke", HitboxToggle)
+HitboxStroke.Color = Color3.fromRGB(50, 50, 50)
+HitboxStroke.Thickness = 1.5
+
+-- [3] SLIDER PENGATUR UKURAN HITBOX 
+local HitboxSliderFrame = Instance.new("Frame", PageMain)
+HitboxSliderFrame.Size = UDim2.new(1, -20, 0, 50)
+HitboxSliderFrame.Position = UDim2.new(0, 10, 0, 225)
+HitboxSliderFrame.BackgroundTransparency = 1
+
+local HitboxSliderTitle = Instance.new("TextLabel", HitboxSliderFrame)
+HitboxSliderTitle.Size = UDim2.new(1, 0, 0, 20)
+HitboxSliderTitle.Text = "HITBOX SIZE: " .. tostring(Config.Hitbox_Size)
+HitboxSliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+HitboxSliderTitle.Font = Enum.Font.GothamBold
+HitboxSliderTitle.TextSize = 11
+HitboxSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+HitboxSliderTitle.BackgroundTransparency = 1
+
+local HitboxSliderBg = Instance.new("Frame", HitboxSliderFrame)
+HitboxSliderBg.Size = UDim2.new(1, 0, 0, 8)
+HitboxSliderBg.Position = UDim2.new(0, 0, 0, 25)
+HitboxSliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", HitboxSliderBg).CornerRadius = UDim.new(1, 0)
+
+local HitboxSliderBar = Instance.new("Frame", HitboxSliderBg)
+HitboxSliderBar.Size = UDim2.new(0.4, 0, 1, 0)
+HitboxSliderBar.BackgroundColor3 = Config.UI_Color
+Instance.new("UICorner", HitboxSliderBar).CornerRadius = UDim.new(1, 0)
+
+local HitboxSliderBtn = Instance.new("TextButton", HitboxSliderBg)
+HitboxSliderBtn.Size = UDim2.new(0, 16, 0, 16)
+HitboxSliderBtn.Position = UDim2.new(0.4, -8, 0.5, -8)
+HitboxSliderBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+HitboxSliderBtn.Text = ""
+Instance.new("UICorner", HitboxSliderBtn).CornerRadius = UDim.new(1, 0)
+
+-- Fungsi Sinkronisasi Fisik Karakter Musuh
+local function UpdateHitboxes()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local root = player.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                if Config.Hitbox_Enabled then
+                    root.Size = Vector3.new(Config.Hitbox_Size, Config.Hitbox_Size, Config.Hitbox_Size)
+                    root.Transparency = 0.7
+                    root.BrickColor = BrickColor.new("Really red")
+                    root.Material = Enum.Material.Neon
+                    root.CanCollide = false
+                else
+                    root.Size = Vector3.new(2, 2, 1)
+                    root.Transparency = 1
+                    root.BrickColor = BrickColor.new("Medium stone grey")
+                    root.Material = Enum.Material.Plastic
+                    root.CanCollide = true
+                end
+            end
+        end
+    end
+end
+
+-- Mekanika Seret Slider Hitbox (Mobile & PC)
+local function AktifkanSliderHitbox()
+    local Draggable = false
+    HitboxSliderBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Draggable = true
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            Draggable = false
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if Draggable and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local RentangX = math.clamp((input.Position.X - HitboxSliderBg.AbsolutePosition.X) / HitboxSliderBg.AbsoluteSize.X, 0, 1)
+            HitboxSliderBar.Size = UDim2.new(RentangX, 0, 1, 0)
+            HitboxSliderBtn.Position = UDim2.new(RentangX, -8, 0.5, -8)
+            
+            local NilaiBaru = math.round(2 + (RentangX * 28)) -- Jangkauan Hitbox: 2 - 30
+            Config.Hitbox_Size = NilaiBaru
+            HitboxSliderTitle.Text = "HITBOX SIZE: " .. tostring(NilaiBaru)
+            if Config.Hitbox_Enabled then UpdateHitboxes() end
+        end
+    end)
+end
+AktifkanSliderHitbox()
+
+-- Sistem Pemicu Tombol Hitbox
+HitboxToggle.MouseButton1Click:Connect(function()
+    Config.Hitbox_Enabled = not Config.Hitbox_Enabled
+    if Config.Hitbox_Enabled then
+        HitboxToggle.Text = "HITBOX EXPANDER: ON"
+        HitboxToggle.BackgroundColor3 = Config.UI_Color
+        HitboxToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        HitboxToggle.Text = "HITBOX EXPANDER: OFF"
+        HitboxToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        HitboxToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+    end
+    UpdateHitboxes()
+end)
+
+-- Loop Konstan Mengunci Ukuran Pemain yang Baru Muncul
+RunService.RenderStepped:Connect(function()
+    if Config.Hitbox_Enabled then
+        UpdateHitboxes()
+    end
+end)
+
+-- ==========================================
+-- FOOTER TEXT INFORMASI BAWAH MENU
+-- ==========================================
 local CustomText = Instance.new("TextLabel", PageMain)
 CustomText.Size = UDim2.new(1, -20, 0, 40)
-CustomText.Position = UDim2.new(0, 10, 0, 175)
+CustomText.Position = UDim2.new(0, 10, 0, 285)
 CustomText.Text = "Mobile & PC Adaptive Combat System\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent: Bullets redirect to target UpperTorso"
 CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
 CustomText.Font = Enum.Font.Gotham
 CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
+
 
 -- ISI KONTEN TAB MISC
 local SpeedConfig = {
