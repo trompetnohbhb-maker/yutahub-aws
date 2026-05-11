@@ -724,7 +724,8 @@ local function AddPremiumESP(Player)
             local Root = Player.Character.HumanoidRootPart
             local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             
-            if Hum and Root and MyRoot and Hum.Health > 0 then
+            -- SAKELAR TEAM-CHECK DISISIPKAN DI SINI (Hanya menggambar jika Player.Team tidak sama dengan LocalPlayer.Team)
+            if Hum and Root and MyRoot and Hum.Health > 0 and Player.Team ~= LocalPlayer.Team then
                 local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
 
                 if OnScreen then
@@ -768,6 +769,7 @@ local function AddPremiumESP(Player)
                     HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
                 end
             else
+                -- Sembunyikan garis secara instan jika target adalah teman satu tim
                 BoxOutline.Visible = false; Box.Visible = false
                 HealthOutline.Visible = false; HealthBar.Visible = false; Info.Visible = false
             end
@@ -781,6 +783,7 @@ local function AddPremiumESP(Player)
         end
     end)
 end
+
 
 -- LOGIKA NAVIGATION SIDEBAR TAB
 local TabListLayout = Instance.new("UIListLayout", TabPanel)
