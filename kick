@@ -28,16 +28,17 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
+local CoreGui = game:GetService("CoreGui") -- Mengganti PlayerGui ke CoreGui
 
-if PlayerGui:FindFirstChild("YutaHub_Premium") then 
-    PlayerGui.YutaHub_Premium:Destroy() 
+if CoreGui:FindFirstChild("YutaHub_Premium") then 
+    CoreGui.YutaHub_Premium:Destroy() 
 end
 
 -- [[ 2. MAIN UNIVERSAL UI DESIGN ]] --
-local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "YutaHub_Premium"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui -- Memasukkan UI ke dalam CoreGui agar tidak terhapus game
 
 -- TOMBOL BULAT KECIL (MINIMIZE LOGO)
 local ToggleIcon = Instance.new("TextButton", ScreenGui)
