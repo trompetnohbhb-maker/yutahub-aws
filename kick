@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V7.1-MOBILE_PC",
+    Version = "V7.0-MOBILE_PC",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
@@ -234,98 +234,7 @@ CustomText.BackgroundTransparency = 1
 local MiscText = Instance.new("TextLabel", PageMisc)
 MiscText.Size = UDim2.new(1, -20, 1, -20)
 MiscText.Position = UDim2.new(0, 10, 0, 10)
-MiscText.Text = "local CharacterSettings = {
-    SpeedValue = 16 -- Nilai default
-}
-
--- 1. LABEL INFO
-local SpeedLabel = Instance.new("TextLabel", PageMisc)
-SpeedLabel.Size = UDim2.new(1, -20, 0, 20)
-SpeedLabel.Position = UDim2.new(0, 10, 0, 15)
-SpeedLabel.Text = "PENGATURAN KECEPATAN JALAN"
-SpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.TextSize = 12
-SpeedLabel.BackgroundTransparency = 1
-
--- 2. SLIDER UTK PENGATUR NILAI SPEED
-local M_SliderFrame = Instance.new("Frame", PageMisc)
-M_SliderFrame.Size = UDim2.new(1, -20, 0, 50)
-M_SliderFrame.Position = UDim2.new(0, 10, 0, 45)
-M_SliderFrame.BackgroundTransparency = 1
-
-local M_SliderTitle = Instance.new("TextLabel", M_SliderFrame)
-M_SliderTitle.Size = UDim2.new(1, 0, 0, 20)
-M_SliderTitle.Text = "NILAI WALK SPEED: 16"
-M_SliderTitle.TextColor3 = Color3.fromRGB(180, 180, 180)
-M_SliderTitle.Font = Enum.Font.Gotham
-M_SliderTitle.TextSize = 11
-M_SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-M_SliderTitle.BackgroundTransparency = 1
-
-local M_SliderBg = Instance.new("Frame", M_SliderFrame)
-M_SliderBg.Size = UDim2.new(1, 0, 0, 8)
-M_SliderBg.Position = UDim2.new(0, 0, 0, 25)
-M_SliderBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", M_SliderBg).CornerRadius = UDim.new(1, 0)
-
-local M_SliderBar = Instance.new("Frame", M_SliderBg)
-M_SliderBar.Size = UDim2.new(0, 0, 1, 0) 
-M_SliderBar.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-Instance.new("UICorner", M_SliderBar).CornerRadius = UDim.new(1, 0)
-
-local M_SliderBtn = Instance.new("TextButton", M_SliderBg)
-M_SliderBtn.Size = UDim2.new(0, 16, 0, 16)
-M_SliderBtn.Position = UDim2.new(0, -8, 0.5, -8)
-M_SliderBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-M_SliderBtn.Text = ""
-Instance.new("UICorner", M_SliderBtn).CornerRadius = UDim.new(1, 0)
-
--- ==========================================
--- LOGIKA INTERAKSI SLIDER
--- ==========================================
-
-local function UpdateWalkSpeed(value)
-    local Character = game.Players.LocalPlayer.Character
-    if Character then
-        local Humanoid = Character:FindFirstChildOfClass("Humanoid")
-        if Humanoid then
-            Humanoid.WalkSpeed = value
-        end
-    end
-end
-
-local function UpdateSliderVisual()
-    local percentage = math.clamp((game:GetService("UserInputService"):GetMouseLocation().X - M_SliderBg.AbsolutePosition.X) / M_SliderBg.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(16 + (percentage * 84)) -- Batas maksimal 100
-    CharacterSettings.SpeedValue = rawValue
-    
-    M_SliderTitle.Text = "NILAI WALK SPEED: " .. tostring(rawValue)
-    M_SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
-    M_SliderBtn.Position = UDim2.new(percentage, -8, 0.5, -8)
-    
-    UpdateWalkSpeed(rawValue)
-end
-
-local Dragging = false
-M_SliderBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.Font.SourceSans.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = true
-    end
-end)
-
-game:GetService("UserInputService").InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        Dragging = false
-    end
-end)
-
-game:GetService("UserInputService").InputChanged:Connect(function(input)
-    if Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSliderVisual()
-    end
-end)
-"
+MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini siap diisi dengan fitur tambahan seperti Teleport, Fly, Speed, atau fitur-fitur server lainnya."
 MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
 MiscText.Font = Enum.Font.Gotham
 MiscText.TextSize = 13
