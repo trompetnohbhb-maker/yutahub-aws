@@ -2,8 +2,14 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V4.3-BOX_EMPTY",
+    Version = "V5.5-FOV_SLIDER",
+    
+    -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
+    Aimbot_Enabled = false,
+    Show_FOV = false,
+    FOV_Radius = 100, -- Nilai awal ukuran bulat FOV
+    Aimbot_Smoothness = 0.15, -- Default halus
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -11,14 +17,15 @@ local Config = {
 
 -- Pengaturan Variabel Engine ESP (BORDER PUTIH + KOSONG DALAM)
 local Settings = {
-    BoxColor = Color3.fromRGB(255, 255, 255), -- GARIS PINGGIR PUTIH
-    TextColor = Color3.fromRGB(255, 255, 255), -- TEKS PUTIH
+    BoxColor = Color3.fromRGB(255, 255, 255), 
+    TextColor = Color3.fromRGB(255, 255, 255), 
     HealthBar = true,
     Distance = true
 }
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
@@ -100,10 +107,10 @@ GetBtn.Font = Enum.Font.GothamBold
 GetBtn.TextSize = 14
 Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
--- KOTAK CANVAS MENU UTAMA
+-- KOTAK CANVAS MENU UTAMA (DIPERBESAR SEDIKIT AGAR SLIDER MUAT)
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 450, 0, 280)
-MainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
+MainFrame.Size = UDim2.new(0, 450, 0, 290)
+MainFrame.Position = UDim2.new(0.5, -225, 0.5, -145)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Visible = false 
 MainFrame.Active = true      
@@ -150,31 +157,100 @@ end
 
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
-local PageMisc = CreatePage("Misc") -- FIX: Diubah dari Stats menjadi Misc
+local PageMisc = CreatePage("Misc")
 
--- KONTEN TAB MAIN
-local MainText = Instance.new("TextLabel", PageMain)
-MainText.Size = UDim2.new(1, -20, 1, -20)
-MainText.Position = UDim2.new(0, 10, 0, 10)
-MainText.Text = "Selamat Datang di YutaHub V2!\n\nSilakan buka tab 'ESP' di sebelah kiri untuk mengaktifkan sistem pelacakan target.\n\nFungsi Auto-Farm Blox Fruit akan segera hadir di halaman ini."
-MainText.TextColor3 = Color3.fromRGB(160, 160, 160)
-MainText.Font = Enum.Font.Gotham
-MainText.TextSize = 13
-MainText.TextWrapped = true
-MainText.BackgroundTransparency = 1
+-- ==========================================
+-- ISI KONTEN TAB MAIN: INTERACTIVE COMBAT
+-- ==========================================
+local AimbotToggle = Instance.new("TextButton", PageMain)
+AimbotToggle.Size = UDim2.new(1, -20, 0, 38)
+AimbotToggle.Position = UDim2.new(0, 10, 0, 15)
+AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+AimbotToggle.Text = "AIMBOT: OFF"
+AimbotToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+AimbotToggle.Font = Enum.Font.GothamBold
+AimbotToggle.TextSize = 12
+Instance.new("UICorner", AimbotToggle).CornerRadius = UDim.new(0, 6)
+local AimStroke = Instance.new("UIStroke", AimbotToggle)
+AimStroke.Color = Color3.fromRGB(50, 50, 50)
+AimStroke.Thickness = 1.5
 
--- KONTEN TAB MISC
+local FOVToggle = Instance.new("TextButton", PageMain)
+FOVToggle.Size = UDim2.new(1, -20, 0, 38)
+FOVToggle.Position = UDim2.new(0, 10, 0, 63)
+FOVToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+FOVToggle.Text = "SHOW FOV CIRCLE: OFF"
+FOVToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+FOVToggle.Font = Enum.Font.GothamBold
+FOVToggle.TextSize = 12
+Instance.new("UICorner", FOVToggle).CornerRadius = UDim.new(0, 6)
+local FOVStroke = Instance.new("UIStroke", FOVToggle)
+FOVStroke.Color = Color3.fromRGB(50, 50, 50)
+FOVStroke.Thickness = 1.5
+
+-- ==========================================
+-- SAKTI: SLIDER PENGATUR BULATAN FOV
+-- ==========================================
+local SliderFrame = Instance.new("Frame", PageMain)
+SliderFrame.Size = UDim2.new(1, -20, 0, 50)
+SliderFrame.Position = UDim2.new(0, 10, 0, 115)
+SliderFrame.BackgroundTransparency = 1
+
+local SliderTitle = Instance.new("TextLabel", SliderFrame)
+SliderTitle.Size = UDim2.new(1, 0, 0, 20)
+SliderTitle.Text = "FOV SIZE: 100"
+SliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SliderTitle.Font = Enum.Font.GothamBold
+SliderTitle.TextSize = 11
+SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+SliderTitle.BackgroundTransparency = 1
+
+local SliderBackground = Instance.new("Frame", SliderFrame)
+SliderBackground.Size = UDim2.new(1, 0, 0, 8)
+SliderBackground.Position = UDim2.new(0, 0, 0, 25)
+SliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", SliderBackground).CornerRadius = UDim.new(1, 0)
+
+local SliderBar = Instance.new("Frame", SliderBackground)
+SliderBar.Size = UDim2.new(0.25, 0, 1, 0) -- 25% default (Radius 100)
+SliderBar.BackgroundColor3 = Config.UI_Color
+Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
+
+local SliderButton = Instance.new("TextButton", SliderBackground)
+SliderButton.Size = UDim2.new(0, 16, 0, 16)
+SliderButton.Position = UDim2.new(0.25, -8, 0.5, -8)
+SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SliderButton.Text = ""
+Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
+
+-- ==========================================
+-- SAKELAR LAINNYA DI TAB MAIN
+-- ==========================================
+local SmoothToggle = Instance.new("TextButton", PageMain)
+SmoothToggle.Size = UDim2.new(1, -20, 0, 38)
+SmoothToggle.Position = UDim2.new(0, 10, 0, 175)
+SmoothToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SmoothToggle.Text = "AIM LOCK TYPE: SMOOTH (LEAP)"
+SmoothToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SmoothToggle.Font = Enum.Font.GothamBold
+SmoothToggle.TextSize = 11
+Instance.new("UICorner", SmoothToggle).CornerRadius = UDim.new(0, 6)
+local SmoothStroke = Instance.new("UIStroke", SmoothToggle)
+SmoothStroke.Color = Color3.fromRGB(50, 50, 50)
+SmoothStroke.Thickness = 1.5
+
+-- ISI KONTEN TAB MISC
 local MiscText = Instance.new("TextLabel", PageMisc)
 MiscText.Size = UDim2.new(1, -20, 1, -20)
 MiscText.Position = UDim2.new(0, 10, 0, 10)
-MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini akan menampung fitur tambahan seperti Teleport Island, Server Hop, atau Bring Mob nantinya."
+MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini siap diisi dengan fitur tambahan seperti Teleport, Fly, Speed, atau fitur-fitur server lainnya."
 MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
 MiscText.Font = Enum.Font.Gotham
 MiscText.TextSize = 13
 MiscText.TextWrapped = true
 MiscText.BackgroundTransparency = 1
 
--- SAKELAR DI DALAM TAB ESP (FIX: Nama tombol diubah jadi ESP murni & lebih kecil)
+-- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
 ESPToggle.Size = UDim2.new(1, -20, 0, 45)
 ESPToggle.Position = UDim2.new(0, 10, 0, 20)
@@ -189,15 +265,103 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. FIXED TRANSPARENT BOX ESP ENGINE ]] --
+-- [[ 3. LOBANG ENGINE AIMBOT & FOV CIRCLE ]] --
+-- ==========================================
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Thickness = 1.5
+FOVCircle.NumSides = 64
+FOVCircle.Radius = Config.FOV_Radius
+FOVCircle.Filled = false
+FOVCircle.Visible = false
+
+local function GetClosestPlayer()
+    local target = nil
+    local shortestDistance = math.huge
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+            local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                local distance = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)).Magnitude
+                if distance < shortestDistance and distance < Config.FOV_Radius then
+                    shortestDistance = distance
+                    target = player
+                end
+            end
+        end
+    end
+    return target
+end
+
+local Aiming = false
+UserInputService.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then Aiming = true end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton2 then Aiming = false end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Config.Show_FOV then
+        FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        FOVCircle.Radius = Config.FOV_Radius -- Terikat Slider secara real-time
+        FOVCircle.Visible = true
+    else
+        FOVCircle.Visible = false
+    end
+
+    if Config.Aimbot_Enabled and Aiming then
+        local targetPlayer = GetClosestPlayer()
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
+            local targetHead = targetPlayer.Character.Head.Position
+            local camPos = Camera.CFrame.Position
+            local aimDirection = (targetHead - camPos).Unit
+            
+            local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
+        end
+    end
+end)
+
+-- ==========================================
+-- LOGIKA SLIDER INTERAKTIF (DRAG & SLIDE)
+-- ==========================================
+local function UpdateSlider()
+    -- Rumus merubah koordinat x-axis menjadi radius bulatan FOV (skala 30 sampai 300)
+    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
+    local rawValue = math.floor(30 + (percentage * 270)) -- Min 30, Max 300
+    Config.FOV_Radius = rawValue
+    
+    -- Update Teks dan Bar Visual
+    SliderTitle.Text = "FOV SIZE: " .. tostring(rawValue)
+    SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
+    SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
+end
+
+local DraggingSlider = false
+SliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = true
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = false
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider()
+    end
+end)
+
+-- ==========================================
+-- [[ 4. FIXED TRANSPARENT BOX ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
-
-local function CreateDraw(obj, props)
-    local draw = Drawing.new(obj)
-    for i, v in pairs(props) do draw[i] = v end
-    return draw
-end
 
 local function ClearESP(player)
     if ActiveESP[player] then
@@ -231,7 +395,6 @@ local function AddPremiumESP(Player)
                 local BoxSize = Vector2.new(Size, Size * 1.5)
                 local BoxPos = Vector2.new(Pos.X - BoxSize.X / 2, Pos.Y - BoxSize.Y / 2)
 
-                -- 1. BOX BENING
                 BoxOutline.Size = BoxSize
                 BoxOutline.Position = BoxPos
                 BoxOutline.Visible = true
@@ -240,7 +403,6 @@ local function AddPremiumESP(Player)
                 Box.Position = BoxPos
                 Box.Visible = true
 
-                -- 2. HEALTH BAR PUTIH
                 if Settings.HealthBar then
                     local MaxHealth = Hum.MaxHealth > 0 and Hum.MaxHealth or 100
                     local HealthOffset = (Hum.Health / MaxHealth) * BoxSize.Y
@@ -255,11 +417,10 @@ local function AddPremiumESP(Player)
                     HealthBar.Visible = true
                 end
 
-                -- 3. TEKS "ESP" HALUS MINI
                 if Settings.Distance then
-                    local Dist = math.floor((Root.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude)
-                    Info.Text = "ESP | " .. Dist .. "m"
-                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 14)
+                    local Dist = math.floor((Root.Position - MyRoot.Position).Magnitude)
+                    Info.Text = string.upper(Player.Name) .. " | " .. Dist .. "M"
+                    Info.Position = Vector2.new(Pos.X, BoxPos.Y - 16)
                     Info.Visible = true
                 end
             else
@@ -299,11 +460,10 @@ end
 
 AddTabButton("Main")
 AddTabButton("ESP")
-AddTabButton("Misc") -- FIX: Tombol tab diganti dari Stats menjadi Misc
+AddTabButton("Misc")
 SwitchTab("Main")
 
--- [[ 4. LOGIKA UTAMA INTERAKSI ]] --
-local UserInputService = game:GetService("UserInputService")
+-- [[ 5. LOGIKA UTAMA INTERAKSI ]] --
 
 local function UnlockMenu()
     KeyFrame.Visible = false
@@ -333,6 +493,49 @@ ESPToggle.MouseButton1Click:Connect(function()
         ESPToggle.Text = "ESP: OFF"
         ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         ESPStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Sakelar On/Off Aimbot
+AimbotToggle.MouseButton1Click:Connect(function()
+    Config.Aimbot_Enabled = not Config.Aimbot_Enabled
+    if Config.Aimbot_Enabled then
+        AimbotToggle.Text = "AIMBOT: ON"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        AimStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        AimbotToggle.Text = "AIMBOT: OFF"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        AimStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Sakelar On/Off FOV Circle
+FOVToggle.MouseButton1Click:Connect(function()
+    Config.Show_FOV = not Config.Show_FOV
+    if Config.Show_FOV then
+        FOVToggle.Text = "SHOW FOV CIRCLE: ON"
+        FOVToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        FOVStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        FOVToggle.Text = "SHOW FOV CIRCLE: OFF"
+        FOVToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        FOVStroke.Color = Color3.fromRGB(50, 50, 50)
+    end
+end)
+
+-- Sakelar Kehalusan Lock (Smooth vs Instan)
+SmoothToggle.MouseButton1Click:Connect(function()
+    if Config.Aimbot_Smoothness == 0.15 then
+        Config.Aimbot_Smoothness = 1.0 -- Instan Lock
+        SmoothToggle.Text = "AIM LOCK TYPE: INSTANT (RAW)"
+        SmoothToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
+        SmoothStroke.Color = Color3.fromRGB(255, 0, 50)
+    else
+        Config.Aimbot_Smoothness = 0.15 -- Smooth Lock
+        SmoothToggle.Text = "AIM LOCK TYPE: SMOOTH (LEAP)"
+        SmoothToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        SmoothStroke.Color = Color3.fromRGB(50, 50, 50)
     end
 end)
 
