@@ -2,14 +2,14 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V5.5-FOV_SLIDER",
+    Version = "V6.0-COMBAT_OP",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
-    Aimbot_Enabled = false,
+    Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
     Show_FOV = false,
-    FOV_Radius = 100, -- Nilai awal ukuran bulat FOV
-    Aimbot_Smoothness = 0.15, -- Default halus
+    FOV_Radius = 100, 
+    Aimbot_Smoothness = 0.15,
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -107,7 +107,7 @@ GetBtn.Font = Enum.Font.GothamBold
 GetBtn.TextSize = 14
 Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
--- KOTAK CANVAS MENU UTAMA (DIPERBESAR SEDIKIT AGAR SLIDER MUAT)
+-- KOTAK CANVAS MENU UTAMA
 local MainFrame = Instance.new("Frame", ScreenGui)
 MainFrame.Size = UDim2.new(0, 450, 0, 290)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -145)
@@ -166,7 +166,7 @@ local AimbotToggle = Instance.new("TextButton", PageMain)
 AimbotToggle.Size = UDim2.new(1, -20, 0, 38)
 AimbotToggle.Position = UDim2.new(0, 10, 0, 15)
 AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-AimbotToggle.Text = "AIMBOT: OFF"
+AimbotToggle.Text = "AIMBOT MODE: OFF"
 AimbotToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 AimbotToggle.Font = Enum.Font.GothamBold
 AimbotToggle.TextSize = 12
@@ -188,9 +188,7 @@ local FOVStroke = Instance.new("UIStroke", FOVToggle)
 FOVStroke.Color = Color3.fromRGB(50, 50, 50)
 FOVStroke.Thickness = 1.5
 
--- ==========================================
--- SAKTI: SLIDER PENGATUR BULATAN FOV
--- ==========================================
+-- SLIDER PENGATUR BULATAN FOV
 local SliderFrame = Instance.new("Frame", PageMain)
 SliderFrame.Size = UDim2.new(1, -20, 0, 50)
 SliderFrame.Position = UDim2.new(0, 10, 0, 115)
@@ -212,7 +210,7 @@ SliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 Instance.new("UICorner", SliderBackground).CornerRadius = UDim.new(1, 0)
 
 local SliderBar = Instance.new("Frame", SliderBackground)
-SliderBar.Size = UDim2.new(0.25, 0, 1, 0) -- 25% default (Radius 100)
+SliderBar.Size = UDim2.new(0.25, 0, 1, 0)
 SliderBar.BackgroundColor3 = Config.UI_Color
 Instance.new("UICorner", SliderBar).CornerRadius = UDim.new(1, 0)
 
@@ -223,21 +221,14 @@ SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 SliderButton.Text = ""
 Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 
--- ==========================================
--- SAKELAR LAINNYA DI TAB MAIN
--- ==========================================
-local SmoothToggle = Instance.new("TextButton", PageMain)
-SmoothToggle.Size = UDim2.new(1, -20, 0, 38)
-SmoothToggle.Position = UDim2.new(0, 10, 0, 175)
-SmoothToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-SmoothToggle.Text = "AIM LOCK TYPE: SMOOTH (LEAP)"
-SmoothToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
-SmoothToggle.Font = Enum.Font.GothamBold
-SmoothToggle.TextSize = 11
-Instance.new("UICorner", SmoothToggle).CornerRadius = UDim.new(0, 6)
-local SmoothStroke = Instance.new("UIStroke", SmoothToggle)
-SmoothStroke.Color = Color3.fromRGB(50, 50, 50)
-SmoothStroke.Thickness = 1.5
+local CustomText = Instance.new("TextLabel", PageMain)
+CustomText.Size = UDim2.new(1, -20, 0, 40)
+CustomText.Position = UDim2.new(0, 10, 0, 175)
+CustomText.Text = "Aimbot 1: Auto Lock On Left-Click\nAimbot 2: Silent Aim (Direct Target)"
+CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
+CustomText.Font = Enum.Font.Gotham
+CustomText.TextSize = 11
+CustomText.BackgroundTransparency = 1
 
 -- ISI KONTEN TAB MISC
 local MiscText = Instance.new("TextLabel", PageMisc)
@@ -265,7 +256,7 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. LOBANG ENGINE AIMBOT & FOV CIRCLE ]] --
+-- [[ 3. LOBANG ENGINE AIMBOT & SILENT AIM ]] --
 -- ==========================================
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -294,46 +285,72 @@ local function GetClosestPlayer()
     return target
 end
 
-local Aiming = false
-UserInputService.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then Aiming = true end
+-- Deteksi klik kiri mouse (MouseButton1) untuk Aimbot Mode 1
+local LeftClicking = false
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        LeftClicking = true
+    end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton2 then Aiming = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        LeftClicking = false
+    end
 end)
 
+-- HOOK LOGIC SILENT AIM (Tipe 2)
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    
+    if Config.Aimbot_Type == "Silent Aim" and method == "FindPartOnRayWithIgnoreList" then
+        local target = GetClosestPlayer()
+        if target and target.Character and target.Character:FindFirstChild("Head") then
+            -- Membelokkan jalur peluru langsung ke kepala target
+            local origin = Camera.CFrame.Position
+            local direction = (target.Character.Head.Position - origin).Unit * 1000
+            args[1] = Ray.new(origin, direction)
+            return oldNamecall(self, unpack(args))
+        end
+    end
+    return oldNamecall(self, ...)
+end)
+setreadonly(mt, true)
+
+-- Thread Render Kamera
 RunService.RenderStepped:Connect(function()
     if Config.Show_FOV then
         FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-        FOVCircle.Radius = Config.FOV_Radius -- Terikat Slider secara real-time
+        FOVCircle.Radius = Config.FOV_Radius
         FOVCircle.Visible = true
     else
         FOVCircle.Visible = false
     end
 
-    if Config.Aimbot_Enabled and Aiming then
+    -- AIMBOT TIPE 1: Kunci Kamera Pada Klik Kiri
+    if Config.Aimbot_Type == "Auto-Lock" and LeftClicking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
             local targetHead = targetPlayer.Character.Head.Position
             local camPos = Camera.CFrame.Position
             local aimDirection = (targetHead - camPos).Unit
-            
             local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
         end
     end
 end)
 
--- ==========================================
--- LOGIKA SLIDER INTERAKTIF (DRAG & SLIDE)
--- ==========================================
+-- LOGIKA SLIDER INTERAKTIF
 local function UpdateSlider()
-    -- Rumus merubah koordinat x-axis menjadi radius bulatan FOV (skala 30 sampai 300)
     local percentage = math.clamp((UserInputService:GetMouseLocation().X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(30 + (percentage * 270)) -- Min 30, Max 300
+    local rawValue = math.floor(30 + (percentage * 270))
     Config.FOV_Radius = rawValue
     
-    -- Update Teks dan Bar Visual
     SliderTitle.Text = "FOV SIZE: " .. tostring(rawValue)
     SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
     SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
@@ -345,13 +362,11 @@ SliderButton.InputBegan:Connect(function(input)
         DraggingSlider = true
     end
 end)
-
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         DraggingSlider = false
     end
 end)
-
 UserInputService.InputChanged:Connect(function(input)
     if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         UpdateSlider()
@@ -359,7 +374,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ==========================================
--- [[ 4. FIXED TRANSPARENT BOX ESP ENGINE ]] --
+-- [[ 4. INDEPENDENT PRO ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -496,15 +511,21 @@ ESPToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Sakelar On/Off Aimbot
+-- Sakelar Mode Aimbot (3 Siklus Mode: Off -> Auto-Lock -> Silent Aim)
 AimbotToggle.MouseButton1Click:Connect(function()
-    Config.Aimbot_Enabled = not Config.Aimbot_Enabled
-    if Config.Aimbot_Enabled then
-        AimbotToggle.Text = "AIMBOT: ON"
+    if Config.Aimbot_Type == "Off" then
+        Config.Aimbot_Type = "Auto-Lock"
+        AimbotToggle.Text = "AIMBOT MODE: LOCK (LEFT CLICK)"
         AimbotToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         AimStroke.Color = Color3.fromRGB(0, 255, 100)
+    elseif Config.Aimbot_Type == "Auto-Lock" then
+        Config.Aimbot_Type = "Silent Aim"
+        AimbotToggle.Text = "AIMBOT MODE: SILENT AIM"
+        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 40) -- Warna ungu premium
+        AimStroke.Color = Color3.fromRGB(200, 0, 255)
     else
-        AimbotToggle.Text = "AIMBOT: OFF"
+        Config.Aimbot_Type = "Off"
+        AimbotToggle.Text = "AIMBOT MODE: OFF"
         AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         AimStroke.Color = Color3.fromRGB(50, 50, 50)
     end
@@ -521,21 +542,6 @@ FOVToggle.MouseButton1Click:Connect(function()
         FOVToggle.Text = "SHOW FOV CIRCLE: OFF"
         FOVToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         FOVStroke.Color = Color3.fromRGB(50, 50, 50)
-    end
-end)
-
--- Sakelar Kehalusan Lock (Smooth vs Instan)
-SmoothToggle.MouseButton1Click:Connect(function()
-    if Config.Aimbot_Smoothness == 0.15 then
-        Config.Aimbot_Smoothness = 1.0 -- Instan Lock
-        SmoothToggle.Text = "AIM LOCK TYPE: INSTANT (RAW)"
-        SmoothToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-        SmoothStroke.Color = Color3.fromRGB(255, 0, 50)
-    else
-        Config.Aimbot_Smoothness = 0.15 -- Smooth Lock
-        SmoothToggle.Text = "AIM LOCK TYPE: SMOOTH (LEAP)"
-        SmoothToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        SmoothStroke.Color = Color3.fromRGB(50, 50, 50)
     end
 end)
 
