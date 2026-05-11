@@ -2,14 +2,25 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V7.0-MOBILE_PC",
+    Version = "V7.5-MISC_ACTIVE",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
-    Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
+    Aimbot_Type = "Off", 
     Show_FOV = false,
     FOV_Radius = 100, 
-    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP (0.05 - 1)
+    Aimbot_Smoothness = 0.15,
+    
+    -- Status Fitur MISC (Pergerakan)
+    Speed_Enabled = false,
+    Jump_Enabled = false,
+    Fly_Enabled = false,
+    Noclip_Enabled = false,
+    
+    -- Nilai Default MISC
+    WalkSpeed_Val = 60, -- Kecepatan lari cepat
+    JumpPower_Val = 120, -- Tinggi lompatan
+    Fly_Speed = 50, -- Kecepatan terbang
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -155,6 +166,7 @@ local function CreatePage(name)
     return Page
 end
 
+-- FIX: Mengganti struktur inisialisasi Tab Page agar 100% murni MAIN, ESP, dan MISC
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
 local PageMisc = CreatePage("Misc")
@@ -224,22 +236,68 @@ Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 local CustomText = Instance.new("TextLabel", PageMain)
 CustomText.Size = UDim2.new(1, -20, 0, 40)
 CustomText.Position = UDim2.new(0, 10, 0, 175)
-CustomText.Text = "Mobile & PC Adaptive Combat System\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent: Bullets redirect to target UpperTorso"
+CustomText.Text = "Mobile & PC Adaptive Combat System\(\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent:\) Bullets redirect to target UpperTorso"
 CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
 CustomText.Font = Enum.Font.Gotham
 CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
 
--- ISI KONTEN TAB MISC
-local MiscText = Instance.new("TextLabel", PageMisc)
-MiscText.Size = UDim2.new(1, -20, 1, -20)
-MiscText.Position = UDim2.new(0, 10, 0, 10)
-MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini siap diisi dengan fitur tambahan seperti Teleport, Fly, Speed, atau fitur-fitur server lainnya."
-MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
-MiscText.Font = Enum.Font.Gotham
-MiscText.TextSize = 13
-MiscText.TextWrapped = true
-MiscText.BackgroundTransparency = 1
+-- ==========================================
+-- ISI KONTEN TAB MISC: MOVEMENT HACKS (SPEED, JUMP, FLY, NOCLIP)
+-- ==========================================
+local ContainerScroll = Instance.new("ScrollingFrame", PageMisc)
+ContainerScroll.Size = UDim2.new(1, 0, 1, 0)
+ContainerScroll.BackgroundTransparency = 1
+ContainerScroll.CanvasSize = UDim2.new(0, 0, 0, 320) -- Membuat halaman bisa di-scroll ke bawah di HP
+ContainerScroll.ScrollBarThickness = 4
+
+local SpeedToggle = Instance.new("TextButton", ContainerScroll)
+SpeedToggle.Size = UDim2.new(1, -20, 0, 42)
+SpeedToggle.Position = UDim2.new(0, 10, 0, 15)
+SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedToggle.Text = "SPEED HACK (60): OFF"
+SpeedToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedToggle.Font = Enum.Font.GothamBold
+SpeedToggle.TextSize = 12
+Instance.new("UICorner", SpeedToggle).CornerRadius = UDim.new(0, 6)
+local SpeedStroke = Instance.new("UIStroke", SpeedToggle)
+SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
+
+local JumpToggle = Instance.new("TextButton", ContainerScroll)
+JumpToggle.Size = UDim2.new(1, -20, 0, 42)
+JumpToggle.Position = UDim2.new(0, 10, 0, 70)
+JumpToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JumpToggle.Text = "JUMP HACK (120): OFF"
+JumpToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+JumpToggle.Font = Enum.Font.GothamBold
+JumpToggle.TextSize = 12
+Instance.new("UICorner", JumpToggle).CornerRadius = UDim.new(0, 6)
+local JumpStroke = Instance.new("UIStroke", JumpToggle)
+JumpStroke.Color = Color3.fromRGB(50, 50, 50)
+
+local FlyToggle = Instance.new("TextButton", ContainerScroll)
+FlyToggle.Size = UDim2.new(1, -20, 0, 42)
+FlyToggle.Position = UDim2.new(0, 10, 0, 125)
+FlyToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+FlyToggle.Text = "FLY HACK: OFF"
+FlyToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+FlyToggle.Font = Enum.Font.GothamBold
+FlyToggle.TextSize = 12
+Instance.new("UICorner", FlyToggle).CornerRadius = UDim.new(0, 6)
+local FlyStroke = Instance.new("UIStroke", FlyToggle)
+FlyStroke.Color = Color3.fromRGB(50, 50, 50)
+
+local NoclipToggle = Instance.new("TextButton", ContainerScroll)
+NoclipToggle.Size = UDim2.new(1, -20, 0, 42)
+NoclipToggle.Position = UDim2.new(0, 10, 0, 180)
+NoclipToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+NoclipToggle.Text = "NOCLIP (WALLPASS): OFF"
+NoclipToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+NoclipToggle.Font = Enum.Font.GothamBold
+NoclipToggle.TextSize = 12
+Instance.new("UICorner", NoclipToggle).CornerRadius = UDim.new(0, 6)
+local NoclipStroke = Instance.new("UIStroke", NoclipToggle)
+NoclipStroke.Color = Color3.fromRGB(50, 50, 50)
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
@@ -256,7 +314,7 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. ADAPTIVE MOBILE & PC COMBAT ENGINE ]] --
+-- [[ 3. LOBANG ENGINE AIMBOT & SILENT AIM ]] --
 -- ==========================================
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -287,22 +345,19 @@ end
 
 -- DETEKSI CROSS-PLATFORM: PC (Klik Kiri) & HP Mobile (Touch Layar)
 local Attacking = false
-
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
-    -- Deteksi PC Klik Kiri ATAU HP Mobile Layar disentuh
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = true
     end
 end)
-
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = false
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
+-- HOOK LOGIC SILENT AIM
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -336,7 +391,6 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
 
-    -- LOCK KEPALA: Aktif saat Klik Kiri (PC) atau Jempol sedang menembak di layar (HP)
     if Config.Aimbot_Type == "Auto-Lock" and Attacking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
@@ -344,8 +398,6 @@ RunService.RenderStepped:Connect(function()
             local camPos = Camera.CFrame.Position
             local aimDirection = (targetHead - camPos).Unit
             local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
-            
-            -- Gerakan mulus agar tidak guncang keras di HP Redmi
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
         end
     end
@@ -364,31 +416,90 @@ end
 
 local DraggingSlider = false
 SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSlider = true
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSlider = true end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSlider = false
-    end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSlider = false end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        UpdateSlider()
+    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSlider() end
+end)
+
+-- ==========================================
+-- [[ 4. CORE MOVEMENT HACKS ENGINE ]] --
+-- ==========================================
+local Flying_BodyPos, Flying_BodyGyro
+
+RunService.RenderStepped:Connect(function()
+    local Char = LocalPlayer.Character
+    local Hum = Char and Char:FindFirstChildOfClass("Humanoid")
+    local Root = Char and Char:FindFirstChild("HumanoidRootPart")
+    
+    -- 1. SPEED & JUMP POWER HACK LOOP
+    if Hum and Root then
+        if Config.Speed_Enabled then
+            Hum.WalkSpeed = Config.WalkSpeed_Val
+        end
+        if Config.Jump_Enabled then
+            Hum.JumpPower = Config.JumpPower_Val
+            Hum.UseJumpPower = true
+        end
+    end
+    
+    -- 2. FLY ENGINE (Melayang menggunakan kontrol joystick HP)
+    if Config.Fly_Enabled and Root and Hum then
+        Hum.PlatformStand = true
+        
+        if not Flying_BodyPos then
+            Flying_BodyPos = Instance.new("BodyPosition", Root)
+            Flying_BodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            Flying_BodyPos.Position = Root.Position
+            
+            Flying_BodyGyro = Instance.new("BodyGyro", Root)
+            Flying_BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            Flying_BodyGyro.CFrame = Root.CFrame
+        end
+        
+        -- Kalkulasi arah terbang menyesuaikan arah kamera HP-mu
+        local moveDirection = Hum.MoveDirection
+        local flyVelocity = Vector3.new(0, 0.1, 0) -- Hover default
+        
+        if moveDirection.Magnitude > 0 then
+            flyVelocity = moveDirection * Config.Fly_Speed
+        end
+        
+        -- Kontrol Naik / Turun manual menggunakan input sentuhan lompat
+        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+            flyVelocity = flyVelocity + Vector3.new(0, Config.Fly_Speed, 0)
+        end
+        
+        Flying_BodyPos.Position = Root.Position + (flyVelocity * task.wait())
+        Flying_BodyGyro.CFrame = Camera.CFrame
+    else
+        -- Matikan terbang
+        if Flying_BodyPos then
+            Flying_BodyPos:Destroy()
+            Flying_BodyPos = nil
+            Flying_BodyGyro:Destroy()
+            Flying_BodyGyro = nil
+        end
+        if Hum then Hum.PlatformStand = false end
+    end
+    
+    -- 3. NOCLIP ENGINE (Tembus Tembok)
+    if Config.Noclip_Enabled and Char then
+        for _, part in pairs(Char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
     end
 end)
 
 -- ==========================================
--- [[ 4. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
+-- [[ 5. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
 -- ==========================================
 local ActiveESP = {}
-
-local function CreateDraw(obj, props)
-    local draw = Drawing.new(obj)
-    for i, v in pairs(props) do draw[i] = v end
-    return draw
-end
 
 local function ClearESP(player)
     if ActiveESP[player] then
@@ -491,95 +602,4 @@ local function AddTabButton(name)
     Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
-    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
-    Btn.MouseButton1Click:Connect(function() SwitchTab(name) end)
-end
-
-AddTabButton("Main")
-AddTabButton("ESP")
-AddTabButton("Misc")
-SwitchTab("Main")
-
--- [[ 5. LOGIKA UTAMA INTERAKSI ]] --
-
-local function UnlockMenu()
-    KeyFrame.Visible = false
-    ToggleIcon.Visible = true
-    for _, v in pairs(Players:GetPlayers()) do AddPremiumESP(v) end
-    Players.PlayerAdded:Connect(AddPremiumESP)
-    Players.PlayerRemoving:Connect(ClearESP)
-end
-
-ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
-
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    -- Tombol insert tetap dideteksi (untuk PC)
-    if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
-        MainFrame.Visible = not MainFrame.Visible
-    end
-end)
-
--- Sakelar On/Off ESP
-ESPToggle.MouseButton1Click:Connect(function()
-    Config.ESP_Enabled = not Config.ESP_Enabled
-    if Config.ESP_Enabled then
-        ESPToggle.Text = "ESP: ON"
-        ESPToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
-        ESPStroke.Color = Color3.fromRGB(0, 255, 100)
-    else
-        ESPToggle.Text = "ESP: OFF"
-        ESPToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        ESPStroke.Color = Color3.fromRGB(50, 50, 50)
-    end
-end)
-
--- Sakelar Mode Aimbot (3 Siklus Mode)
-AimbotToggle.MouseButton1Click:Connect(function()
-    if Config.Aimbot_Type == "Off" then
-        Config.Aimbot_Type = "Auto-Lock"
-        AimbotToggle.Text = "AIMBOT MODE: LOCK (TAP SHOOT)"
-        AimbotToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
-        AimStroke.Color = Color3.fromRGB(0, 255, 100)
-    elseif Config.Aimbot_Type == "Auto-Lock" then
-        Config.Aimbot_Type = "Silent Aim"
-        AimbotToggle.Text = "AIMBOT MODE: SILENT AIM (BODY)"
-        AimbotToggle.BackgroundColor3 = Color3.fromRGB(40, 0, 40)
-        AimStroke.Color = Color3.fromRGB(200, 0, 255)
-    else
-        Config.Aimbot_Type = "Off"
-        AimbotToggle.Text = "AIMBOT MODE: OFF"
-        AimbotToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        AimStroke.Color = Color3.fromRGB(50, 50, 50)
-    end
-end)
-
--- Sakelar On/Off FOV Circle
-FOVToggle.MouseButton1Click:Connect(function()
-    Config.Show_FOV = not Config.Show_FOV
-    if Config.Show_FOV then
-        FOVToggle.Text = "SHOW FOV CIRCLE: ON"
-        FOVToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
-        FOVStroke.Color = Color3.fromRGB(0, 255, 100)
-    else
-        FOVToggle.Text = "SHOW FOV CIRCLE: OFF"
-        FOVToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        FOVStroke.Color = Color3.fromRGB(50, 50, 50)
-    end
-end)
-
-CheckBtn.MouseButton1Click:Connect(function()
-    if KeyInput.Text == Config.CorrectKey then UnlockMenu() else KeyInput.Text = ""; KeyInput.PlaceholderText = "KUNCI SALAH!" end
-end)
-
-getgenv().setclip = setclipboard or toclipboard or (Clipboard and Clipboard.set)
-GetBtn.MouseButton1Click:Connect(function()
-    if getgenv().setclip then
-        getgenv().setclip(Config.KeyURL)
-        GetBtn.Text = "LINK COPIED!"
-        task.wait(1.5)
-        GetBtn.Text = "GET KEY"
-    else
-        GetBtn.Text = "Salin: " .. Config.KeyURL
-    end
-end)
+    Instance.new("UICorner", Btn).CornerRadius
