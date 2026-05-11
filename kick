@@ -2,7 +2,7 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V6.5-COMBAT_FIX",
+    Version = "V6.6-MOUSE_FIX",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
@@ -224,7 +224,7 @@ Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 local CustomText = Instance.new("TextLabel", PageMain)
 CustomText.Size = UDim2.new(1, -20, 0, 40)
 CustomText.Position = UDim2.new(0, 10, 0, 175)
-CustomText.Text = "Lock Mode: Auto Headshot on Left-Click\nSilent Mode: Direct Bullet redirection to Enemy Body"
+CustomText.Text = "Lock Mode: Auto Headshot on Left-Click (Fixed Hardware Emulation)\nSilent Mode: Direct Bullet redirection to Enemy Body"
 CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
 CustomText.Font = Enum.Font.Gotham
 CustomText.TextSize = 11
@@ -285,21 +285,35 @@ local function GetClosestPlayer()
     return target
 end
 
--- Deteksi klik kiri mouse (MouseButton1) untuk Aimbot Mode 1
+-- FIX: Pengaktifan emulasi hardware input menggunakan mouse1press() / mouse1release() bawaan Executor
 local LeftClicking = false
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         LeftClicking = true
+        
+        -- SAKTI: Jika Aimbot tipe Lock aktif, paksa pemicu hardware emulasi
+        if Config.Aimbot_Type == "Auto-Lock" then
+            local targetPlayer = GetClosestPlayer()
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
+                -- Emulasi Hardware Click terpasang aman
+                if mouse1press and mouse1release then
+                    mouse1press()
+                    task.wait(0.02)
+                    mouse1release()
+                end
+            end
+        end
     end
 end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         LeftClicking = false
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Tipe 2: Mengalihkan Target Klik ke Tubuh Musuh/UpperTorso)
+-- HOOK LOGIC SILENT AIM (Tipe 2: Mengalihkan target klik murni ke tubuh/UpperTorso)
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -309,7 +323,6 @@ mt.__index = newcclosure(function(self, index)
     if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
         if self == Mouse and (index == "Hit" or index == "Target") then
             local target = GetClosestPlayer()
-            -- Menyerang bagian tubuh utama (HumanoidRootPart / UpperTorso)
             if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                 local targetBody = target.Character.HumanoidRootPart
                 if index == "Hit" then
@@ -396,7 +409,6 @@ end
 local function AddPremiumESP(Player)
     if Player == LocalPlayer then return end
 
-    -- Pembuatan objek awal (Disembunyikan dlu sebelum divalidasi)
     local BoxOutline = CreateDraw("Square", {Thickness = 3, Color = Color3.fromRGB(0,0,0), Filled = false, Transparency = 1, Visible = false})
     local Box = CreateDraw("Square", {Thickness = 1, Color = Settings.BoxColor, Filled = false, Transparency = 1, Visible = false})
     
@@ -409,7 +421,6 @@ local function AddPremiumESP(Player)
 
     local RenderConn
     RenderConn = RunService.RenderStepped:Connect(function()
-        -- PERBAIKAN BUG: Validasi ekstra agar script tidak crash jika karakter belum termuat sempurna
         if Config.ESP_Enabled and Player and Player.Parent and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
             local Hum = Player.Character:FindFirstChildOfClass("Humanoid")
             local Root = Player.Character.HumanoidRootPart
@@ -531,7 +542,7 @@ ESPToggle.MouseButton1Click:Connect(function()
     end
 end)
 
--- Sakelar Mode Aimbot (3 Siklus Mode: Off -> Auto-Lock -> Silent Aim)
+-- Sakelar Mode Aimbot (3 Siklus Mode)
 AimbotToggle.MouseButton1Click:Connect(function()
     if Config.Aimbot_Type == "Off" then
         Config.Aimbot_Type = "Auto-Lock"
