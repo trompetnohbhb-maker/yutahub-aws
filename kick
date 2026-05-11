@@ -2,14 +2,14 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V6.6-MOUSE_FIX",
+    Version = "V7.0-MOBILE_PC",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
     Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
     Show_FOV = false,
     FOV_Radius = 100, 
-    Aimbot_Smoothness = 0.15,
+    Aimbot_Smoothness = 0.15, -- Kehalusan lock di HP (0.05 - 1)
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -109,7 +109,7 @@ Instance.new("UICorner", GetBtn).CornerRadius = UDim.new(0, 6)
 
 -- KOTAK CANVAS MENU UTAMA
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 450, 0, 290)
+MainFrame.Size = UDim2.new(0, 450, 0, 280)
 MainFrame.Position = UDim2.new(0.5, -225, 0.5, -145)
 MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 MainFrame.Visible = false 
@@ -224,10 +224,10 @@ Instance.new("UICorner", SliderButton).CornerRadius = UDim.new(1, 0)
 local CustomText = Instance.new("TextLabel", PageMain)
 CustomText.Size = UDim2.new(1, -20, 0, 40)
 CustomText.Position = UDim2.new(0, 10, 0, 175)
-CustomText.Text = "Lock Mode: Auto Headshot on Left-Click (Fixed Hardware Emulation)\nSilent Mode: Direct Bullet redirection to Enemy Body"
+CustomText.Text = "Mobile & PC Adaptive Combat System\nLock: Autolock Head on Left-Click (PC) / Touchscreen Shoot (HP)\nSilent: Bullets redirect to target UpperTorso"
 CustomText.TextColor3 = Color3.fromRGB(130, 130, 130)
 CustomText.Font = Enum.Font.Gotham
-CustomText.TextSize = 11
+CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
 
 -- ISI KONTEN TAB MISC
@@ -256,7 +256,7 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. LOBANG ENGINE AIMBOT & SILENT AIM ]] --
+-- [[ 3. ADAPTIVE MOBILE & PC COMBAT ENGINE ]] --
 -- ==========================================
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -285,35 +285,24 @@ local function GetClosestPlayer()
     return target
 end
 
--- FIX: Pengaktifan emulasi hardware input menggunakan mouse1press() / mouse1release() bawaan Executor
-local LeftClicking = false
+-- DETEKSI CROSS-PLATFORM: PC (Klik Kiri) & HP Mobile (Touch Layar)
+local Attacking = false
+
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        LeftClicking = true
-        
-        -- SAKTI: Jika Aimbot tipe Lock aktif, paksa pemicu hardware emulasi
-        if Config.Aimbot_Type == "Auto-Lock" then
-            local targetPlayer = GetClosestPlayer()
-            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
-                -- Emulasi Hardware Click terpasang aman
-                if mouse1press and mouse1release then
-                    mouse1press()
-                    task.wait(0.02)
-                    mouse1release()
-                end
-            end
-        end
+    -- Deteksi PC Klik Kiri ATAU HP Mobile Layar disentuh
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Attacking = true
     end
 end)
 
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        LeftClicking = false
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        Attacking = false
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Tipe 2: Mengalihkan target klik murni ke tubuh/UpperTorso)
+-- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -337,7 +326,7 @@ mt.__index = newcclosure(function(self, index)
 end)
 setreadonly(mt, true)
 
--- Thread Render Kamera
+-- Thread Pengendali Kamera Aimbot
 RunService.RenderStepped:Connect(function()
     if Config.Show_FOV then
         FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
@@ -347,14 +336,16 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
 
-    -- AIMBOT TIPE 1: Kunci Kamera Pada Klik Kiri ke Kepala Target
-    if Config.Aimbot_Type == "Auto-Lock" and LeftClicking then
+    -- LOCK KEPALA: Aktif saat Klik Kiri (PC) atau Jempol sedang menembak di layar (HP)
+    if Config.Aimbot_Type == "Auto-Lock" and Attacking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
             local targetHead = targetPlayer.Character.Head.Position
             local camPos = Camera.CFrame.Position
             local aimDirection = (targetHead - camPos).Unit
             local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
+            
+            -- Gerakan mulus agar tidak guncang keras di HP Redmi
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
         end
     end
@@ -523,6 +514,7 @@ ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFram
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
+    -- Tombol insert tetap dideteksi (untuk PC)
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
         MainFrame.Visible = not MainFrame.Visible
     end
@@ -546,7 +538,7 @@ end)
 AimbotToggle.MouseButton1Click:Connect(function()
     if Config.Aimbot_Type == "Off" then
         Config.Aimbot_Type = "Auto-Lock"
-        AimbotToggle.Text = "AIMBOT MODE: LOCK (LEFT CLICK)"
+        AimbotToggle.Text = "AIMBOT MODE: LOCK (TAP SHOOT)"
         AimbotToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
         AimStroke.Color = Color3.fromRGB(0, 255, 100)
     elseif Config.Aimbot_Type == "Auto-Lock" then
