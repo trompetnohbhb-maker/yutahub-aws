@@ -285,12 +285,10 @@ local function GetClosestPlayer()
     return target
 end
 
--- DETEKSI CROSS-PLATFORM: PC (Klik Kiri) & HP Mobile (Touch Layar)
 local Attacking = false
 
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
-    -- Deteksi PC Klik Kiri ATAU HP Mobile Layar disentuh
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = true
     end
@@ -302,7 +300,7 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
+-- HOOK LOGIC SILENT AIM
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -336,7 +334,6 @@ RunService.RenderStepped:Connect(function()
         FOVCircle.Visible = false
     end
 
-    -- LOCK KEPALA: Aktif saat Klik Kiri (PC) atau Jempol sedang menembak di layar (HP)
     if Config.Aimbot_Type == "Auto-Lock" and Attacking then
         local targetPlayer = GetClosestPlayer()
         if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Head") then
@@ -345,7 +342,6 @@ RunService.RenderStepped:Connect(function()
             local aimDirection = (targetHead - camPos).Unit
             local targetCFrame = CFrame.lookAt(camPos, camPos + aimDirection)
             
-            -- Gerakan mulus agar tidak guncang keras di HP Redmi
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.Aimbot_Smoothness)
         end
     end
@@ -380,7 +376,7 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 -- ==========================================
--- [[ 4. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
+-- [[ 4. INDEPENDENT PRO ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -475,7 +471,7 @@ local function AddPremiumESP(Player)
     end)
 end
 
--- LOGIKA NAVIGATION SIDEBAR TAB
+-- LOGIKA NAVIGATION SIDEBAR TAB (FIXED: Hanya Mengubah Teks Tab)
 local TabListLayout = Instance.new("UIListLayout", TabPanel)
 TabListLayout.Padding = UDim.new(0, 5)
 
@@ -495,6 +491,7 @@ local function AddTabButton(name)
     Btn.MouseButton1Click:Connect(function() SwitchTab(name) end)
 end
 
+-- FIXED TAB NAMES
 AddTabButton("Main")
 AddTabButton("ESP")
 AddTabButton("Misc")
@@ -514,7 +511,6 @@ ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFram
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    -- Tombol insert tetap dideteksi (untuk PC)
     if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
         MainFrame.Visible = not MainFrame.Visible
     end
