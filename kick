@@ -231,15 +231,93 @@ CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
 
 -- ISI KONTEN TAB MISC
-local MiscText = Instance.new("TextLabel", PageMisc)
-MiscText.Size = UDim2.new(1, -20, 1, -20)
-MiscText.Position = UDim2.new(0, 10, 0, 10)
-MiscText.Text = "Selamat Datang di Tab Misc!\n\nHalaman ini siap diisi dengan fitur tambahan seperti Teleport, Fly, Speed, atau fitur-fitur server lainnya."
-MiscText.TextColor3 = Color3.fromRGB(160, 160, 160)
-MiscText.Font = Enum.Font.Gotham
-MiscText.TextSize = 13
-MiscText.TextWrapped = true
-MiscText.BackgroundTransparency = 1
+local SpeedHack_Enabled = false
+local SpeedHack_Value = 16
+
+local SpeedToggle = Instance.new("TextButton", PageMisc)
+SpeedToggle.Size = UDim2.new(1, -20, 0, 38)
+SpeedToggle.Position = UDim2.new(0, 10, 0, 15)
+SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SpeedToggle.Text = "SPEED HACK: OFF"
+SpeedToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedToggle.Font = Enum.Font.GothamBold
+SpeedToggle.TextSize = 12
+Instance.new("UICorner", SpeedToggle).CornerRadius = UDim.new(0, 6)
+local SpeedStroke = Instance.new("UIStroke", SpeedToggle)
+SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
+SpeedStroke.Thickness = 1.5
+
+local SpeedSliderFrame = Instance.new("Frame", PageMisc)
+SpeedSliderFrame.Size = UDim2.new(1, -20, 0, 50)
+SpeedSliderFrame.Position = UDim2.new(0, 10, 0, 67)
+SpeedSliderFrame.BackgroundTransparency = 1
+
+local SpeedSliderTitle = Instance.new("TextLabel", SpeedSliderFrame)
+SpeedSliderTitle.Size = UDim2.new(1, 0, 0, 20)
+SpeedSliderTitle.Text = "WALK SPEED: 16"
+SpeedSliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedSliderTitle.Font = Enum.Font.GothamBold
+SpeedSliderTitle.TextSize = 11
+SpeedSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+SpeedSliderTitle.BackgroundTransparency = 1
+
+local SpeedSliderBackground = Instance.new("Frame", SpeedSliderFrame)
+SpeedSliderBackground.Size = UDim2.new(1, 0, 0, 8)
+SpeedSliderBackground.Position = UDim2.new(0, 0, 0, 25)
+SpeedSliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", SpeedSliderBackground).CornerRadius = UDim.new(1, 0)
+
+local SpeedSliderBar = Instance.new("Frame", SpeedSliderBackground)
+SpeedSliderBar.Size = UDim2.new(0, 0, 1, 0)
+SpeedSliderBar.BackgroundColor3 = Config.UI_Color
+Instance.new("UICorner", SpeedSliderBar).CornerRadius = UDim.new(1, 0)
+
+local SpeedSliderButton = Instance.new("TextButton", SpeedSliderBackground)
+SpeedSliderButton.Size = UDim2.new(0, 16, 0, 16)
+SpeedSliderButton.Position = UDim2.new(0, -8, 0.5, -8)
+SpeedSliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+SpeedSliderButton.Text = ""
+Instance.new("UICorner", SpeedSliderButton).CornerRadius = UDim.new(1, 0)
+
+-- Loop Pengendali Nilai Speed Konstan
+RunService.Heartbeat:Connect(function()
+    if SpeedHack_Enabled then
+        local Char = LocalPlayer.Character
+        if Char then
+            local Hum = Char:FindFirstChildOfClass("Humanoid")
+            if Hum then
+                Hum.WalkSpeed = SpeedHack_Value
+            end
+        end
+    end
+end)
+
+local function UpdateSpeedSlider()
+    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SpeedSliderBackground.AbsolutePosition.X) / SpeedSliderBackground.AbsoluteSize.X, 0, 1)
+    local rawValue = math.floor(16 + (percentage * 134)) -- Skala Kecepatan 16 - 150
+    SpeedHack_Value = rawValue
+    
+    SpeedSliderTitle.Text = "WALK SPEED: " .. tostring(rawValue)
+    SpeedSliderBar.Size = UDim2.new(percentage, 0, 1, 0)
+    SpeedSliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
+end
+
+local DraggingSpeed = false
+SpeedSliderButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSpeed = true
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSpeed = false
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if DraggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSpeedSlider()
+    end
+end)
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
