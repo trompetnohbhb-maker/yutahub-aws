@@ -231,9 +231,12 @@ CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
 
 -- ISI KONTEN TAB MISC
-local SpeedHack_Enabled = false
-local SpeedHack_Value = 16
+local SpeedConfig = {
+    Enabled = false,
+    Value = 16
+}
 
+-- 1. TOMBOL TOGGLE (ON/OFF)
 local SpeedToggle = Instance.new("TextButton", PageMisc)
 SpeedToggle.Size = UDim2.new(1, -20, 0, 38)
 SpeedToggle.Position = UDim2.new(0, 10, 0, 15)
@@ -247,75 +250,101 @@ local SpeedStroke = Instance.new("UIStroke", SpeedToggle)
 SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
 SpeedStroke.Thickness = 1.5
 
-local SpeedSliderFrame = Instance.new("Frame", PageMisc)
-SpeedSliderFrame.Size = UDim2.new(1, -20, 0, 50)
-SpeedSliderFrame.Position = UDim2.new(0, 10, 0, 67)
-SpeedSliderFrame.BackgroundTransparency = 1
+-- 2. WADAH SLIDER SPEED
+local M_SliderFrame = Instance.new("Frame", PageMisc)
+M_SliderFrame.Size = UDim2.new(1, -20, 0, 50)
+M_SliderFrame.Position = UDim2.new(0, 10, 0, 65)
+M_SliderFrame.BackgroundTransparency = 1
 
-local SpeedSliderTitle = Instance.new("TextLabel", SpeedSliderFrame)
-SpeedSliderTitle.Size = UDim2.new(1, 0, 0, 20)
-SpeedSliderTitle.Text = "WALK SPEED: 16"
-SpeedSliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-SpeedSliderTitle.Font = Enum.Font.GothamBold
-SpeedSliderTitle.TextSize = 11
-SpeedSliderTitle.TextXAlignment = Enum.TextXAlignment.Left
-SpeedSliderTitle.BackgroundTransparency = 1
+local M_SliderTitle = Instance.new("TextLabel", M_SliderFrame)
+M_SliderTitle.Size = UDim2.new(1, 0, 0, 20)
+M_SliderTitle.Text = "WALK SPEED SIZE: 16"
+M_SliderTitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+M_SliderTitle.Font = Enum.Font.GothamBold
+M_SliderTitle.TextSize = 11
+M_SliderTitle.TextXAlignment = Enum.TextXAlignment.Left
+M_SliderTitle.BackgroundTransparency = 1
 
-local SpeedSliderBackground = Instance.new("Frame", SpeedSliderFrame)
-SpeedSliderBackground.Size = UDim2.new(1, 0, 0, 8)
-SpeedSliderBackground.Position = UDim2.new(0, 0, 0, 25)
-SpeedSliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", SpeedSliderBackground).CornerRadius = UDim.new(1, 0)
+local M_SliderBackground = Instance.new("Frame", M_SliderFrame)
+M_SliderBackground.Size = UDim2.new(1, 0, 0, 8)
+M_SliderBackground.Position = UDim2.new(0, 0, 0, 25)
+M_SliderBackground.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Instance.new("UICorner", M_SliderBackground).CornerRadius = UDim.new(1, 0)
 
-local SpeedSliderBar = Instance.new("Frame", SpeedSliderBackground)
-SpeedSliderBar.Size = UDim2.new(0, 0, 1, 0)
-SpeedSliderBar.BackgroundColor3 = Config.UI_Color
-Instance.new("UICorner", SpeedSliderBar).CornerRadius = UDim.new(1, 0)
+local M_SliderBar = Instance.new("Frame", M_SliderBackground)
+M_SliderBar.Size = UDim2.new(0, 0, 1, 0)
+M_SliderBar.BackgroundColor3 = Config.UI_Color
+Instance.new("UICorner", M_SliderBar).CornerRadius = UDim.new(1, 0)
 
-local SpeedSliderButton = Instance.new("TextButton", SpeedSliderBackground)
-SpeedSliderButton.Size = UDim2.new(0, 16, 0, 16)
-SpeedSliderButton.Position = UDim2.new(0, -8, 0.5, -8)
-SpeedSliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-SpeedSliderButton.Text = ""
-Instance.new("UICorner", SpeedSliderButton).CornerRadius = UDim.new(1, 0)
+local M_SliderButton = Instance.new("TextButton", M_SliderBackground)
+M_SliderButton.Size = UDim2.new(0, 16, 0, 16)
+M_SliderButton.Position = UDim2.new(0, -8, 0.5, -8)
+M_SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+M_SliderButton.Text = ""
+Instance.new("UICorner", M_SliderButton).CornerRadius = UDim.new(1, 0)
 
--- Loop Pengendali Nilai Speed Konstan
-RunService.Heartbeat:Connect(function()
-    if SpeedHack_Enabled then
-        local Char = LocalPlayer.Character
-        if Char then
-            local Hum = Char:FindFirstChildOfClass("Humanoid")
-            if Hum then
-                Hum.WalkSpeed = SpeedHack_Value
+-- ==========================================
+-- LOGIKA INTERAKSI & SAKELAR BYPASS
+-- ==========================================
+
+-- Fungsi klik Tombol Sakelar Speed
+SpeedToggle.MouseButton1Click:Connect(function()
+    SpeedConfig.Enabled = not SpeedConfig.Enabled
+    if SpeedConfig.Enabled then
+        SpeedToggle.Text = "SPEED HACK: ON"
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(0, 40, 20)
+        SpeedStroke.Color = Color3.fromRGB(0, 255, 100)
+    else
+        SpeedToggle.Text = "SPEED HACK: OFF"
+        SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
+        -- Kembalikan kecepatan ke normal saat dimatikan
+        pcall(function()
+            local Char = LocalPlayer.Character
+            if Char and Char:FindFirstChildOfClass("Humanoid") then
+                Char:FindFirstChildOfClass("Humanoid").WalkSpeed = 16
             end
-        end
+        end)
     end
 end)
 
+-- Fungsi Geser Batang Slider Speed
 local function UpdateSpeedSlider()
-    local percentage = math.clamp((UserInputService:GetMouseLocation().X - SpeedSliderBackground.AbsolutePosition.X) / SpeedSliderBackground.AbsoluteSize.X, 0, 1)
-    local rawValue = math.floor(16 + (percentage * 134)) -- Skala Kecepatan 16 - 150
-    SpeedHack_Value = rawValue
+    local percentage = math.clamp((UserInputService:GetMouseLocation().X - M_SliderBackground.AbsolutePosition.X) / M_SliderBackground.AbsoluteSize.X, 0, 1)
+    local rawValue = math.floor(16 + (percentage * 134)) -- Rentang nilai 16 - 150
+    SpeedConfig.Value = rawValue
     
-    SpeedSliderTitle.Text = "WALK SPEED: " .. tostring(rawValue)
-    SpeedSliderBar.Size = UDim2.new(percentage, 0, 1, 0)
-    SpeedSliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
+    M_SliderTitle.Text = "WALK SPEED SIZE: " .. tostring(rawValue)
+    M_SliderBar.Size = UDim2.new(percentage, 0, 1, 0)
+    M_SliderButton.Position = UDim2.new(percentage, -8, 0.5, -8)
 end
 
-local DraggingSpeed = false
-SpeedSliderButton.InputBegan:Connect(function(input)
+local M_Dragging = false
+M_SliderButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSpeed = true
+        M_Dragging = true
     end
 end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        DraggingSpeed = false
+        M_Dragging = false
     end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingSpeed and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+    if M_Dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         UpdateSpeedSlider()
+    end
+end)
+
+-- Sistem Pengunci Otomatis agar Speed tidak kembali ke 16 saat melompat/berjalan
+RunService.Stepped:Connect(function()
+    if SpeedConfig.Enabled then
+        pcall(function()
+            local Char = LocalPlayer.Character
+            if Char and Char:FindFirstChildOfClass("Humanoid") then
+                Char:FindFirstChildOfClass("Humanoid").WalkSpeed = SpeedConfig.Value
+            end
+        end)
     end
 end)
 
