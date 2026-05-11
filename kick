@@ -565,17 +565,28 @@ UserInputService.InputEnded:Connect(function(input)
     end
 end)
 
--- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
-local Mouse = LocalPlayer:GetMouse()
+-- ==========================================
+-- [[ CORE BYPASS SILENT AIM UNIVERSAL ]] --
+-- ==========================================
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
+local oldNamecall = mt.__namecall
 setreadonly(mt, false)
 
+-- 1. HOOK UNTUK GAME BERBASIS MOUSE (Game Klasik)
 mt.__index = newcclosure(function(self, index)
     if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
         if self == Mouse and (index == "Hit" or index == "Target") then
             local target = GetClosestPlayer()
-            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            if target and target.Character and target.Character:FindFirstChild("UpperTorso") then
+                local targetBody = target.Character.UpperTorso
+                if index == "Hit" then
+                    return targetBody.CFrame
+                elseif index == "Target" then
+                    return targetBody
+                end
+            elseif target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                -- Backup jika game tidak memiliki struktur part UpperTorso
                 local targetBody = target.Character.HumanoidRootPart
                 if index == "Hit" then
                     return targetBody.CFrame
@@ -587,7 +598,39 @@ mt.__index = newcclosure(function(self, index)
     end
     return oldIndex(self, index)
 end)
+
+-- 2. HOOK UNTUK GAME BERBASIS RAYCAST ENGINE (Game Modern seperti Arsenal, Bedwars, dll)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    
+    if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
+        -- Deteksi jika skrip game memanggil fungsi kalkulasi arah tembakan peluru
+        if method == "Raycast" or method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
+            local target = GetClosestPlayer()
+            if target and target.Character then
+                local targetBody = target.Character:FindFirstChild("UpperTorso") or target.Character:FindFirstChild("HumanoidRootPart")
+                if targetBody then
+                    -- Belokkan arah asal vektor asal peluru ke koordinat tubuh target musuh secara instan
+                    if method == "Raycast" then
+                        -- args[1] adalah Origin, args[2] adalah Direction (Arah)
+                        args[2] = (targetBody.Position - args[1]).Unit * 1000
+                    elseif method == "FindPartOnRay" or method == "FindPartOnRayWithIgnoreList" or method == "FindPartOnRayWithWhitelist" then
+                        -- args[1] adalah Ray structural instansi
+                        local origin = args[1].Origin
+                        args[1] = Ray.new(origin, (targetBody.Position - origin).Unit * 1000)
+                    end
+                end
+            end
+        end
+    end
+    
+    setnamecallmethod(method)
+    return oldNamecall(self, unpack(args))
+end)
+
 setreadonly(mt, true)
+
 
 -- Thread Pengendali Kamera Aimbot
 RunService.RenderStepped:Connect(function()
