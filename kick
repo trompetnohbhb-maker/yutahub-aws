@@ -2,25 +2,21 @@
 local Config = {
     CorrectKey = "YUTABANKAI_2",
     KeyURL = "discord.gg/JQ7dZAVTDW",
-    Version = "V7.5-MISC_ACTIVE",
+    Version = "V8.0-FIX_UI",
     
     -- Status Fitur (Kondisi Awal)
     ESP_Enabled = false,
-    Aimbot_Type = "Off", 
+    Aimbot_Type = "Off", -- "Off", "Auto-Lock", "Silent Aim"
     Show_FOV = false,
     FOV_Radius = 100, 
     Aimbot_Smoothness = 0.15,
     
-    -- Status Fitur MISC (Pergerakan)
-    Speed_Enabled = false,
-    Jump_Enabled = false,
+    -- Status Fitur Tab Misc
+    Speed_Value = 16,
+    Jump_Value = 50,
     Fly_Enabled = false,
     Noclip_Enabled = false,
-    
-    -- Nilai Default MISC
-    WalkSpeed_Val = 60, -- Kecepatan lari cepat
-    JumpPower_Val = 120, -- Tinggi lompatan
-    Fly_Speed = 50, -- Kecepatan terbang
+    Fly_Speed = 50,
     
     -- Tema Utama UI (Merah Neon Yuta)
     UI_Color = Color3.fromRGB(255, 0, 50) 
@@ -166,7 +162,6 @@ local function CreatePage(name)
     return Page
 end
 
--- FIX: Mengganti struktur inisialisasi Tab Page agar 100% murni MAIN, ESP, dan MISC
 local PageMain = CreatePage("Main")
 local PageESP = CreatePage("ESP")
 local PageMisc = CreatePage("Misc")
@@ -243,61 +238,73 @@ CustomText.TextSize = 10
 CustomText.BackgroundTransparency = 1
 
 -- ==========================================
--- ISI KONTEN TAB MISC: MOVEMENT HACKS (SPEED, JUMP, FLY, NOCLIP)
+-- ISI KONTEN TAB MISC (SPEED, JUMP, FLY, NOCLIP)
 -- ==========================================
-local ContainerScroll = Instance.new("ScrollingFrame", PageMisc)
-ContainerScroll.Size = UDim2.new(1, 0, 1, 0)
-ContainerScroll.BackgroundTransparency = 1
-ContainerScroll.CanvasSize = UDim2.new(0, 0, 0, 320) -- Membuat halaman bisa di-scroll ke bawah di HP
-ContainerScroll.ScrollBarThickness = 4
-
-local SpeedToggle = Instance.new("TextButton", ContainerScroll)
-SpeedToggle.Size = UDim2.new(1, -20, 0, 42)
+local SpeedToggle = Instance.new("TextButton", PageMisc)
+SpeedToggle.Size = UDim2.new(0, 140, 0, 35)
 SpeedToggle.Position = UDim2.new(0, 10, 0, 15)
 SpeedToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-SpeedToggle.Text = "SPEED HACK (60): OFF"
-SpeedToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedToggle.Text = "WALK SPEED"
+SpeedToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 SpeedToggle.Font = Enum.Font.GothamBold
-SpeedToggle.TextSize = 12
-Instance.new("UICorner", SpeedToggle).CornerRadius = UDim.new(0, 6)
-local SpeedStroke = Instance.new("UIStroke", SpeedToggle)
-SpeedStroke.Color = Color3.fromRGB(50, 50, 50)
+SpeedToggle.TextSize = 11
+Instance.new("UICorner", SpeedToggle).CornerRadius = UDim.new(0, 5)
 
-local JumpToggle = Instance.new("TextButton", ContainerScroll)
-JumpToggle.Size = UDim2.new(1, -20, 0, 42)
-JumpToggle.Position = UDim2.new(0, 10, 0, 70)
+local SpeedInput = Instance.new("TextBox", PageMisc)
+SpeedInput.Size = UDim2.new(0, 140, 0, 35)
+SpeedInput.Position = UDim2.new(0, 160, 0, 15)
+SpeedInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+SpeedInput.Text = "16"
+SpeedInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedInput.Font = Enum.Font.GothamBold
+SpeedInput.TextSize = 12
+Instance.new("UICorner", SpeedInput).CornerRadius = UDim.new(0, 5)
+
+local JumpToggle = Instance.new("TextButton", PageMisc)
+JumpToggle.Size = UDim2.new(0, 140, 0, 35)
+JumpToggle.Position = UDim2.new(0, 10, 0, 60)
 JumpToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-JumpToggle.Text = "JUMP HACK (120): OFF"
-JumpToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
+JumpToggle.Text = "JUMP POWER"
+JumpToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
 JumpToggle.Font = Enum.Font.GothamBold
-JumpToggle.TextSize = 12
-Instance.new("UICorner", JumpToggle).CornerRadius = UDim.new(0, 6)
-local JumpStroke = Instance.new("UIStroke", JumpToggle)
-JumpStroke.Color = Color3.fromRGB(50, 50, 50)
+JumpToggle.TextSize = 11
+Instance.new("UICorner", JumpToggle).CornerRadius = UDim.new(0, 5)
 
-local FlyToggle = Instance.new("TextButton", ContainerScroll)
-FlyToggle.Size = UDim2.new(1, -20, 0, 42)
-FlyToggle.Position = UDim2.new(0, 10, 0, 125)
+local JumpInput = Instance.new("TextBox", PageMisc)
+JumpInput.Size = UDim2.new(0, 140, 0, 35)
+JumpInput.Position = UDim2.new(0, 160, 0, 60)
+JumpInput.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+JumpInput.Text = "50"
+JumpInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+JumpInput.Font = Enum.Font.GothamBold
+JumpInput.TextSize = 12
+Instance.new("UICorner", JumpInput).CornerRadius = UDim.new(0, 5)
+
+local FlyToggle = Instance.new("TextButton", PageMisc)
+FlyToggle.Size = UDim2.new(1, -20, 0, 38)
+FlyToggle.Position = UDim2.new(0, 10, 0, 110)
 FlyToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-FlyToggle.Text = "FLY HACK: OFF"
+FlyToggle.Text = "FLY (TERBANG): OFF"
 FlyToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 FlyToggle.Font = Enum.Font.GothamBold
-FlyToggle.TextSize = 12
-Instance.new("UICorner", FlyToggle).CornerRadius = UDim.new(0, 6)
+FlyToggle.TextSize = 11
+Instance.new("UICorner", FlyToggle).CornerRadius = UDim.new(0, 5)
 local FlyStroke = Instance.new("UIStroke", FlyToggle)
 FlyStroke.Color = Color3.fromRGB(50, 50, 50)
+FlyStroke.Thickness = 1.5
 
-local NoclipToggle = Instance.new("TextButton", ContainerScroll)
-NoclipToggle.Size = UDim2.new(1, -20, 0, 42)
-NoclipToggle.Position = UDim2.new(0, 10, 0, 180)
+local NoclipToggle = Instance.new("TextButton", PageMisc)
+NoclipToggle.Size = UDim2.new(1, -20, 0, 38)
+NoclipToggle.Position = UDim2.new(0, 10, 0, 155)
 NoclipToggle.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-NoclipToggle.Text = "NOCLIP (WALLPASS): OFF"
+NoclipToggle.Text = "NOCLIP (TEMBUS DINDING): OFF"
 NoclipToggle.TextColor3 = Color3.fromRGB(200, 200, 200)
 NoclipToggle.Font = Enum.Font.GothamBold
-NoclipToggle.TextSize = 12
-Instance.new("UICorner", NoclipToggle).CornerRadius = UDim.new(0, 6)
+NoclipToggle.TextSize = 11
+Instance.new("UICorner", NoclipToggle).CornerRadius = UDim.new(0, 5)
 local NoclipStroke = Instance.new("UIStroke", NoclipToggle)
 NoclipStroke.Color = Color3.fromRGB(50, 50, 50)
+NoclipStroke.Thickness = 1.5
 
 -- SAKELAR DI DALAM TAB ESP
 local ESPToggle = Instance.new("TextButton", PageESP)
@@ -314,7 +321,7 @@ ESPStroke.Color = Color3.fromRGB(50, 50, 50)
 ESPStroke.Thickness = 1.5
 
 -- ==========================================
--- [[ 3. LOBANG ENGINE AIMBOT & SILENT AIM ]] --
+-- [[ 3. ADAPTIVE MOBILE & PC COMBAT ENGINE ]] --
 -- ==========================================
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
@@ -345,19 +352,21 @@ end
 
 -- DETEKSI CROSS-PLATFORM: PC (Klik Kiri) & HP Mobile (Touch Layar)
 local Attacking = false
+
 UserInputService.InputBegan:Connect(function(input, processed)
     if processed then return end
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = true
     end
 end)
+
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         Attacking = false
     end
 end)
 
--- HOOK LOGIC SILENT AIM
+-- HOOK LOGIC SILENT AIM (Membelokkan Tembakan ke Tubuh Musuh)
 local Mouse = LocalPlayer:GetMouse()
 local mt = getrawmetatable(game)
 local oldIndex = mt.__index
@@ -403,6 +412,47 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- ==========================================
+-- [[ 4. LOBANG ENGINE TAB MISC (MOVEMENT) ]] --
+-- ==========================================
+local FlyingBody = nil
+local FlyingVal = nil
+
+RunService.Heartbeat:Connect(function()
+    local char = LocalPlayer.Character
+    if char then
+        -- 1. WalkSpeed & JumpPower Loop
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.WalkSpeed = Config.Speed_Value
+            hum.JumpPower = Config.Jump_Value
+        end
+        
+        -- 2. Noclip Loop
+        if Config.Noclip_Enabled then
+            for _, part in pairs(char:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
+            end
+        end
+        
+        -- 3. Fly Loop (Sakti di Redfinger)
+        if Config.Fly_Enabled and char:FindFirstChild("HumanoidRootPart") then
+            local root = char.HumanoidRootPart
+            local dir = Camera.CFrame.LookVector
+            local moveDir = Vector3.new(0,0,0)
+            
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + dir end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - dir end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - Camera.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + Camera.CFrame.RightVector end
+            
+            root.Velocity = moveDir * Config.Fly_Speed
+        end
+    end
+end)
+
 -- LOGIKA SLIDER INTERAKTIF
 local function UpdateSlider()
     local percentage = math.clamp((UserInputService:GetMouseLocation().X - SliderBackground.AbsolutePosition.X) / SliderBackground.AbsoluteSize.X, 0, 1)
@@ -416,88 +466,23 @@ end
 
 local DraggingSlider = false
 SliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSlider = true end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = true
+    end
 end)
 UserInputService.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then DraggingSlider = false end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        DraggingSlider = false
+    end
 end)
 UserInputService.InputChanged:Connect(function(input)
-    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then UpdateSlider() end
-end)
-
--- ==========================================
--- [[ 4. CORE MOVEMENT HACKS ENGINE ]] --
--- ==========================================
-local Flying_BodyPos, Flying_BodyGyro
-
-RunService.RenderStepped:Connect(function()
-    local Char = LocalPlayer.Character
-    local Hum = Char and Char:FindFirstChildOfClass("Humanoid")
-    local Root = Char and Char:FindFirstChild("HumanoidRootPart")
-    
-    -- 1. SPEED & JUMP POWER HACK LOOP
-    if Hum and Root then
-        if Config.Speed_Enabled then
-            Hum.WalkSpeed = Config.WalkSpeed_Val
-        end
-        if Config.Jump_Enabled then
-            Hum.JumpPower = Config.JumpPower_Val
-            Hum.UseJumpPower = true
-        end
-    end
-    
-    -- 2. FLY ENGINE (Melayang menggunakan kontrol joystick HP)
-    if Config.Fly_Enabled and Root and Hum then
-        Hum.PlatformStand = true
-        
-        if not Flying_BodyPos then
-            Flying_BodyPos = Instance.new("BodyPosition", Root)
-            Flying_BodyPos.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            Flying_BodyPos.Position = Root.Position
-            
-            Flying_BodyGyro = Instance.new("BodyGyro", Root)
-            Flying_BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-            Flying_BodyGyro.CFrame = Root.CFrame
-        end
-        
-        -- Kalkulasi arah terbang menyesuaikan arah kamera HP-mu
-        local moveDirection = Hum.MoveDirection
-        local flyVelocity = Vector3.new(0, 0.1, 0) -- Hover default
-        
-        if moveDirection.Magnitude > 0 then
-            flyVelocity = moveDirection * Config.Fly_Speed
-        end
-        
-        -- Kontrol Naik / Turun manual menggunakan input sentuhan lompat
-        if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-            flyVelocity = flyVelocity + Vector3.new(0, Config.Fly_Speed, 0)
-        end
-        
-        Flying_BodyPos.Position = Root.Position + (flyVelocity * task.wait())
-        Flying_BodyGyro.CFrame = Camera.CFrame
-    else
-        -- Matikan terbang
-        if Flying_BodyPos then
-            Flying_BodyPos:Destroy()
-            Flying_BodyPos = nil
-            Flying_BodyGyro:Destroy()
-            Flying_BodyGyro = nil
-        end
-        if Hum then Hum.PlatformStand = false end
-    end
-    
-    -- 3. NOCLIP ENGINE (Tembus Tembok)
-    if Config.Noclip_Enabled and Char then
-        for _, part in pairs(Char:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
+    if DraggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        UpdateSlider()
     end
 end)
 
 -- ==========================================
--- [[ 5. INDEPENDENT PRO ESP ENGINE (FIXED) ]] --
+-- [[ 5. INDEPENDENT PRO ESP ENGINE ]] --
 -- ==========================================
 local ActiveESP = {}
 
@@ -602,4 +587,35 @@ local function AddTabButton(name)
     Btn.TextColor3 = Color3.fromRGB(200, 200, 200)
     Btn.Font = Enum.Font.GothamBold
     Btn.TextSize = 12
-    Instance.new("UICorner", Btn).CornerRadius
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 4)
+    Btn.MouseButton1Click:Connect(function() SwitchTab(name) end)
+end
+
+AddTabButton("Main")
+AddTabButton("ESP")
+AddTabButton("Misc")
+SwitchTab("Main")
+
+-- [[ 6. LOGIKA UTAMA INTERAKSI ]] --
+
+local function UnlockMenu()
+    KeyFrame.Visible = false
+    ToggleIcon.Visible = true
+    for _, v in pairs(Players:GetPlayers()) do AddPremiumESP(v) end
+    Players.PlayerAdded:Connect(AddPremiumESP)
+    Players.PlayerRemoving:Connect(ClearESP)
+end
+
+ToggleIcon.MouseButton1Click:Connect(function() MainFrame.Visible = not MainFrame.Visible end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == Enum.KeyCode.Insert and not KeyFrame.Visible then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+-- Sakelar On/Off ESP
+ESPToggle.MouseButton1Click:Connect(function()
+    Config.ESP_Enabled = not Config.ESP_Enabled
+    if Config.ESP
