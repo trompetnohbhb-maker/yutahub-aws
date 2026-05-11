@@ -1,6 +1,6 @@
 -- [[ 1. CONFIGURATION & COLOR DESIGN ]] --
 local Config = {
-    CorrectKey = "YUTABANKAI_2",
+    CorrectKey = "YUTAHUB",
     KeyURL = "discord.gg/JQ7dZAVTDW",
     Version = "V1.71-MOBILE_PC",
     
@@ -723,9 +723,9 @@ local function AddPremiumESP(Player)
             local Hum = Player.Character:FindFirstChildOfClass("Humanoid")
             local Root = Player.Character.HumanoidRootPart
             local MyRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            
-           if Hum and Root and MyRoot and Hum.Health > 0 and (Player.TeamColor ~= LocalPlayer.TeamColor or Player.Team == nil) then
 
+          if Hum and Root and MyRoot and Hum.Health > 0 then
+                    local Pos, OnScreen = Camera:WorldToViewportPoint(Root.Position)
 
                 if OnScreen then
                     local Size = 2000 / Pos.Z
