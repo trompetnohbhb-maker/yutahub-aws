@@ -638,6 +638,36 @@ mt2.__namecall = newcclosure(function(self, ...)
 end)
 setreadonly(mt2, true)
 
+-- ==========================================
+-- [[ BYPASS REMOTE EVENT ANTI-CHEAT (ARSENAL) ]] --
+-- ==========================================
+local OldNamecall
+OldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local Method = getnamecallmethod()
+    local Args = {...}
+    
+    if Config.Aimbot_Type == "Silent Aim" and not checkcaller() then
+        if Method == "FireServer" and (self.Name == "HitPart" or self.Name == "Fire" or self.Name == "Bullet" or self.Name == "Shoot") then
+            local Target = GetClosestPlayer()
+            if Target and Target.Character then
+                local TargetBody = Target.Character:FindFirstChild("UpperTorso") or Target.Character:FindFirstChild("HumanoidRootPart")
+                if TargetBody then
+                    for i, v in pairs(Args) do
+                        if typeof(v) == "Vector3" then
+                            Args[i] = TargetBody.Position
+                        elseif typeof(v) == "CFrame" then
+                            Args[i] = TargetBody.CFrame
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return OldNamecall(self, unpack(Args))
+end))
+
+
 -- Thread Pengendali Kamera Aimbot
 RunService.RenderStepped:Connect(function()
     if Config.Show_FOV then
